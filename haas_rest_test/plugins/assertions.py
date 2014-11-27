@@ -6,17 +6,38 @@
 # of the 3-clause BSD license.  See the LICENSE.txt file for details.
 from __future__ import absolute_import, unicode_literals
 
+from jsonschema.exceptions import ValidationError
+import jsonschema
+
+from ..exceptions import YamlParseError
+
 
 class StatusCodeAssertion(object):
 
     _schema = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'Assertion on status code ',
+        'description': 'Test case markup for Haas Rest Test',
+        'type': 'object',
+        'properties': {
+            'expected': {
+                'type': 'integer',
+            },
+        },
+        'required': ['expected']
     }
 
-    def __init__(self, valid_codes):
+    def __init__(self, expected_status):
         super(StatusCodeAssertion, self).__init__()
-        self.valid_codes = valid_codes
+        self.expected_status = expected_status
 
     @classmethod
     def from_dict(cls, data):
-        # FIXME: Validate input with jsonschema
-        return cls(valid_codes=data['expected'])
+        try:
+            jsonschema.validate(data, cls._schema)
+        except ValidationError as e:
+            raise YamlParseError(str(e))
+        return cls(expected_status=data['expected'])
+
+    def run(self, case, response):
+        case.fail()
