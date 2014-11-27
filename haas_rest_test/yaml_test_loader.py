@@ -12,6 +12,7 @@ from jsonschema.exceptions import ValidationError
 from requests.utils import default_user_agent as requests_user_agent
 import jsonschema
 import requests
+import six
 import yaml
 
 from haas.module_import_error import ModuleImportError
@@ -74,7 +75,10 @@ def create_test_case_for_group(filename, group):
 
     class_dict['__str__'] = __str__
 
-    return type('GeneratedYamlTestCase', (unittest.TestCase,), class_dict)
+    class_name = 'GeneratedYamlTestCase'
+    if six.PY2:
+        class_name = class_name.encode('ascii')
+    return type(class_name, (unittest.TestCase,), class_dict)
 
 
 class YamlTestLoader(object):
