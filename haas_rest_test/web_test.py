@@ -33,7 +33,7 @@ class WebTest(object):
         )
 
     @classmethod
-    def from_test_spec(cls, session, spec, config):
+    def from_dict(cls, session, spec, config):
         return cls(
             session=session,
             config=config,

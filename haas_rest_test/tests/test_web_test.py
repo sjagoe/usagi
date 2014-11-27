@@ -17,7 +17,7 @@ from ..web_test import WebTest
 
 class TestWebTest(unittest.TestCase):
 
-    def test_from_spec(self):
+    def test_from_dict(self):
         # Given
         config = Config('http', 'test.invalid')
         session = create_session()
@@ -39,7 +39,7 @@ class TestWebTest(unittest.TestCase):
         )
 
         # When
-        test = WebTest.from_test_spec(session, test_spec, config)
+        test = WebTest.from_dict(session, test_spec, config)
 
         # Then
         self.assertIs(test.session, session)
