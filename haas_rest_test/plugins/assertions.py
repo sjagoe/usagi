@@ -40,4 +40,4 @@ class StatusCodeAssertion(object):
         return cls(expected_status=data['expected'])
 
     def run(self, case, response):
-        case.fail()
+        case.assertEqual(response.status_code, self.expected_status)

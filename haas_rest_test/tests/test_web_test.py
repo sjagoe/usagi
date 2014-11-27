@@ -6,6 +6,8 @@
 # of the 3-clause BSD license.  See the LICENSE.txt file for details.
 from __future__ import absolute_import, unicode_literals
 
+from mock import Mock
+import responses
 from six.moves import urllib
 
 from haas.testing import unittest
@@ -50,7 +52,7 @@ class TestWebTest(unittest.TestCase):
         self.assertEqual(test.method, 'GET')
         self.assertEqual(len(test.assertions), 0)
 
-    def test_assertions(self):
+    def test_create_with_assertions(self):
         # Given
         config = Config('http', 'test.invalid')
         session = create_session()
@@ -77,3 +79,39 @@ class TestWebTest(unittest.TestCase):
         self.assertEqual(len(test.assertions), 1)
         assertion, = test.assertions
         self.assertIsInstance(assertion, StatusCodeAssertion)
+
+    @responses.activate
+    def test_run(self):
+        # Given
+        config = Config('http', 'test.invalid')
+        session = create_session()
+        name = 'A test'
+        url = '/api/test'
+        test_spec = {
+            'name': name,
+            'url': url,
+            'assertions': [
+                {
+                    'name': 'status_code',
+                    'expected': 200,
+                },
+            ],
+        }
+        assertions = {
+            'status_code': StatusCodeAssertion,
+        }
+
+        test = WebTest.from_dict(session, test_spec, config, assertions)
+
+        responses.add(
+            test.method,
+            test.url,
+            status=204,
+        )
+
+        # When
+        case = Mock()
+        test.run(case)
+
+        # Then
+        case.assertEqual.assert_called_once_with(204, 200)
