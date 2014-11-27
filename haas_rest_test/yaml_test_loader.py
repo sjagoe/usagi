@@ -21,6 +21,7 @@ from .config import Config
 from .exceptions import YamlParseError
 from .schema import SCHEMA
 from .utils import create_session
+from .web_test import WebTest
 
 
 logger = logging.getLogger(__name__)
@@ -43,21 +44,23 @@ def _create_yaml_parse_error_test(filename, error):
     return cls(method_name)
 
 
-def _create_test_method(requests_session, config, test_spec):
+def _create_test_method(test):
     def test_method(self):
         self.fail()
 
-    test_method.__doc__ = test_spec['name']
+    test_method.__doc__ = test.name
 
     return test_method
 
 
-def create_test_case_for_group(filename, config, group):
+def create_test_case_for_group(filename, config, group, assertions_map):
     session = create_session()
 
+    tests = [WebTest.from_dict(session, spec, config, assertions_map)
+             for spec in group['tests']]
     class_dict = dict(
-        ('test_{0}'.format(index), _create_test_method(session, config, spec))
-        for index, spec in enumerate(group['tests'])
+        ('test_{0}'.format(index), _create_test_method(test))
+        for index, test in enumerate(tests)
     )
     class_dict[TEST_NAME_ATTRIBUTE] = group['name']
 
@@ -102,7 +105,8 @@ class YamlTestLoader(object):
             return loader.create_suite([test])
         config = Config.from_dict(test_structure['config'])
         cases = (
-            create_test_case_for_group(filename, config, group)
+            create_test_case_for_group(
+                filename, config, group, self._assertions_map)
             for group in test_structure['groups']
         )
         tests = [loader.load_case(case) for case in cases]
