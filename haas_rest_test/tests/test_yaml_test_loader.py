@@ -26,6 +26,9 @@ class TestYamlTestLoader(unittest.TestCase):
     def setUp(self):
         self.loader = YamlTestLoader(Loader())
 
+    def test_plugins_loaded(self):
+        self.assertIn('status_code', self.loader._assertions_map)
+
     def test_load_yaml_tests(self):
         # Given
         test_yaml = textwrap.dedent("""

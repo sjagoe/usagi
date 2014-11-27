@@ -11,6 +11,7 @@ import logging
 from jsonschema.exceptions import ValidationError
 import jsonschema
 import six
+from stevedore.extension import ExtensionManager
 import yaml
 
 from haas.module_import_error import ModuleImportError
@@ -79,6 +80,13 @@ class YamlTestLoader(object):
     def __init__(self, loader):
         super(YamlTestLoader, self).__init__()
         self._loader = loader
+        assertions = ExtensionManager(
+            namespace='haas_rest_test.assertions',
+        )
+        self._assertions_map = dict(
+            (name, assertions[name].plugin)
+            for name in assertions.names()
+        )
 
     def load_tests_from_file(self, filename):
         with open(filename) as fh:
