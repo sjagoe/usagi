@@ -257,3 +257,37 @@ class TestYamlTestLoader(unittest.TestCase):
         # Then
         self.assertFalse(result.wasSuccessful())
         self.assertEqual(len(result.errors), 1)
+
+    def test_case_dunder_str(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+        ---
+          version: '1.0'
+
+          groups:
+            - name: "Basic"
+              tests:
+                - name: "Test root URL"
+                  url: "/"
+                  expected_status: [200]
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # When
+        suite = self.loader.load_tests_from_yaml(
+            test_data, '/path/to/foo.yaml')
+
+        # Then
+        self.assertIsInstance(suite, TestSuite)
+        self.assertEqual(suite.countTestCases(), 1)
+        case = next(find_test_cases(suite))
+
+        # When
+        case_str = str(case)
+        description = case.shortDescription()
+
+        # Then
+        self.assertEqual(case_str, 'Basic (/path/to/foo.yaml)')
+        self.assertEqual(description, 'Test root URL')
