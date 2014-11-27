@@ -6,6 +6,7 @@
 # of the 3-clause BSD license.  See the LICENSE.txt file for details.
 from __future__ import absolute_import, unicode_literals
 
+from requests.exceptions import ConnectionError
 from six.moves import urllib
 
 from .exceptions import InvalidAssertionClass
@@ -65,5 +66,6 @@ class WebTest(object):
             )
         except ConnectionError as exc:
             case.fail('Unable to connect: {!r}'.format(str(exc)))
+            return
         for assertion in self.assertions:
             assertion.run(case, response)

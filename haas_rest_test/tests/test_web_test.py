@@ -115,3 +115,33 @@ class TestWebTest(unittest.TestCase):
 
         # Then
         case.assertEqual.assert_called_once_with(204, 200)
+
+    # @responses.activate
+    def test_connection_error(self):
+        # Given
+        config = Config('http', 'test.invalid')
+        session = create_session()
+        name = 'A test'
+        url = '/api/test'
+        test_spec = {
+            'name': name,
+            'url': url,
+            'assertions': [
+                {
+                    'name': 'status_code',
+                    'expected': 200,
+                },
+            ],
+        }
+        assertions = {
+            'status_code': StatusCodeAssertion,
+        }
+
+        test = WebTest.from_dict(session, test_spec, config, assertions)
+
+        # When
+        case = Mock()
+        test.run(case)
+
+        # Then
+        self.assertTrue(case.fail.called)
