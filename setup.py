@@ -105,7 +105,7 @@ if not is_released:
 
 
 if __name__ == "__main__":
-    install_requires = ['stevedore', 'six']
+    install_requires = ['stevedore', 'six', 'requests', 'pyyaml', 'jsonschema']
     if sys.version_info < (2, 7):
         install_requires += ['unittest2']
 
