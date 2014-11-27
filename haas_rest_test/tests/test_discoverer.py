@@ -114,6 +114,50 @@ class TestYamlTestLoader(unittest.TestCase):
         for case in find_test_cases(suite):
             self.assertIsInstance(case, unittest.TestCase)
 
+    def test_discover_skip_badly_named_files(self):
+        # Given
+        test_yaml_1 = textwrap.dedent("""
+        ---
+          version: '1.0'
+
+          groups:
+            - name: "Basic"
+              tests:
+                - name: "Test root URL"
+                  url: "/"
+                  expected_status: [200]
+        """)
+        test_yaml_2 = textwrap.dedent("""
+        ---
+          version: '1.0'
+
+          groups:
+            - name: "A group"
+              tests:
+                - name: "Download authorization failure"
+                  url:
+                    template: "{data}/test"
+                  expected_status: [404]
+                - name: "Upload authorization failure"
+                  url:
+                    template: "/foo/{upload}/test"
+                  expected_status: [404]
+
+        """)
+        with tempfile.NamedTemporaryFile(
+                delete=False, suffix='.ymll', dir=self.temp_dir) as fh:
+            fh.write(test_yaml_1.encode('utf-8'))
+        with tempfile.NamedTemporaryFile(
+                delete=False, suffix='.yml', dir=self.temp_dir) as fh:
+            fh.write(test_yaml_2.encode('utf-8'))
+
+        # When
+        suite = self.discoverer.discover(self.temp_dir)
+
+        # Then
+        self.assertIsInstance(suite, TestSuite)
+        self.assertEqual(suite.countTestCases(), 2)
+
     def test_discover_no_such_file(self):
         # Given
         test_filename = os.path.join(self.temp_dir, 'dont_exist.yml')
