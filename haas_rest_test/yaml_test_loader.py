@@ -16,6 +16,7 @@ import yaml
 from haas.module_import_error import ModuleImportError
 from haas.testing import unittest
 
+from .config import Config
 from .exceptions import YamlParseError
 from .schema import SCHEMA
 from .utils import create_session
@@ -41,7 +42,7 @@ def _create_yaml_parse_error_test(filename, error):
     return cls(method_name)
 
 
-def _create_test_method(requests_session, test_spec):
+def _create_test_method(requests_session, config, test_spec):
     def test_method(self):
         self.fail()
 
@@ -50,11 +51,11 @@ def _create_test_method(requests_session, test_spec):
     return test_method
 
 
-def create_test_case_for_group(filename, group):
+def create_test_case_for_group(filename, config, group):
     session = create_session()
 
     class_dict = dict(
-        ('test_{0}'.format(index), _create_test_method(session, spec))
+        ('test_{0}'.format(index), _create_test_method(session, config, spec))
         for index, spec in enumerate(group['tests'])
     )
     class_dict[TEST_NAME_ATTRIBUTE] = group['name']
@@ -91,8 +92,9 @@ class YamlTestLoader(object):
         except ValidationError as e:
             test = _create_yaml_parse_error_test(filename, str(e))
             return loader.create_suite([test])
+        config = Config.from_dict(test_structure['config'])
         cases = (
-            create_test_case_for_group(filename, group)
+            create_test_case_for_group(filename, config, group)
             for group in test_structure['groups']
         )
         tests = [loader.load_case(case) for case in cases]
