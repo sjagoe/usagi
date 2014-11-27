@@ -9,6 +9,7 @@ from __future__ import absolute_import, unicode_literals
 import logging
 
 from jsonschema.exceptions import ValidationError
+from requests.utils import default_user_agent as requests_user_agent
 import jsonschema
 import requests
 import yaml
@@ -16,6 +17,7 @@ import yaml
 from haas.module_import_error import ModuleImportError
 from haas.testing import unittest
 
+import haas_rest_test
 from .exceptions import YamlParseError
 from .schema import SCHEMA
 
@@ -24,6 +26,11 @@ logger = logging.getLogger(__name__)
 
 
 TEST_NAME_ATTRIBUTE = 'haas_rest_test_name'
+
+
+def haas_rest_test_user_agent():
+    return 'haas-rest-test/{0} {1}'.format(
+        haas_rest_test.__version__, requests_user_agent())
 
 
 def _create_yaml_parse_error_test(filename, error):
@@ -51,6 +58,8 @@ def _create_test_method(requests_session, test_spec):
 
 def create_test_case_for_group(filename, group):
     session = requests.Session()
+    session.headers['User-Agent'] = haas_rest_test_user_agent()
+
     class_dict = dict(
         ('test_{0}'.format(index), _create_test_method(session, spec))
         for index, spec in enumerate(group['tests'])
