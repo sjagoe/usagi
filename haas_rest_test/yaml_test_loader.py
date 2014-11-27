@@ -89,15 +89,15 @@ class YamlTestLoader(object):
         self.load_tests_from_yaml(test_structure, filename)
 
     def load_tests_from_yaml(self, test_structure, filename):
+        loader = self._loader
         try:
             jsonschema.validate(test_structure, SCHEMA)
         except ValidationError as e:
             test = _create_yaml_parse_error_test(filename, str(e))
-            return [test]
+            return loader.create_suite([test])
         cases = (
             create_test_case_for_group(filename, group)
             for group in test_structure['groups']
         )
-        loader = self._loader
         tests = [loader.load_case(case) for case in cases]
         return loader.create_suite(tests)

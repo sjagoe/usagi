@@ -14,10 +14,12 @@ import yaml
 
 from haas.discoverer import find_test_cases
 from haas.loader import Loader
+from haas.module_import_error import ModuleImportError
 from haas.result import ResultCollecter
 from haas.suite import TestSuite
 from haas.testing import unittest
 
+from ..exceptions import YamlParseError
 from ..schema import SCHEMA
 from ..yaml_test_loader import YamlTestLoader
 
@@ -208,5 +210,50 @@ class TestYamlTestLoader(unittest.TestCase):
 
         # Given
         result = ResultCollecter()
+
+        # When
         case(result)
+
+        # Then
         self.assertFalse(result.wasSuccessful())
+
+    def test_load_invalid_yaml_tests(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+        ---
+          version: '1.0'
+
+          tests:
+            - name: "Test root URL"
+              url: "/"
+              expected_status: [200]
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # When
+        suite = self.loader.load_tests_from_yaml(
+            test_data, '/path/to/foo.yaml')
+
+        # Then
+        self.assertIsInstance(suite, TestSuite)
+        self.assertEqual(suite.countTestCases(), 1)
+        case = next(find_test_cases(suite))
+        self.assertIsInstance(case, unittest.TestCase)
+        self.assertIsInstance(case, ModuleImportError)
+
+        # Given
+        result = ResultCollecter()
+
+        # When/Then
+        meth = getattr(case, case._testMethodName)
+        with self.assertRaises(YamlParseError):
+            meth()
+
+        # When
+        case(result)
+
+        # Then
+        self.assertFalse(result.wasSuccessful())
+        self.assertEqual(len(result.errors), 1)
