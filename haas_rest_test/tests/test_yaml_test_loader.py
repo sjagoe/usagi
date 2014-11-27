@@ -118,6 +118,53 @@ class TestYamlTestLoader(unittest.TestCase):
         # Then
         self.assertTrue(result.wasSuccessful())
 
+    @responses.activate
+    def test_execute_single_case_failure(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+        ---
+          version: '1.0'
+
+          config:
+            host: test.domain
+
+          groups:
+            - name: "Basic"
+              tests:
+                - name: "Test root URL"
+                  url: "/"
+                  assertions:
+                    - name: status_code
+                      expected: 200
+
+        """)
+
+        responses.add(
+            responses.GET,
+            'http://test.domain/',
+            status=400,
+        )
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # When
+        suite = self.loader.load_tests_from_yaml(
+            test_data, '/path/to/foo.yaml')
+
+        # Then
+        self.assertIsInstance(suite, TestSuite)
+        self.assertEqual(suite.countTestCases(), 1)
+        case = next(find_test_cases(suite))
+
+        # Given
+        result = ResultCollecter()
+
+        # When
+        case(result)
+
+        # Then
+        self.assertFalse(result.wasSuccessful())
+
     def test_load_invalid_yaml_tests(self):
         # Given
         test_yaml = textwrap.dedent("""
