@@ -1,0 +1,8 @@
+*~
+*.pyc
+/haas-rest-test/_version.py
+/haas-rest-test.egg-info
+/.coverage
+/htmlcov
+/docs/build
+/.tox
