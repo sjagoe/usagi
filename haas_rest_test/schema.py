@@ -86,7 +86,8 @@ SCHEMA = {
                     '$ref': '#/definitions/name',
                 },
                 'assertions': {
-                    'type': 'object',
+                    'type': 'array',
+                    'minItems': 1,
                 },
             },
             'required': ['url', 'name'],

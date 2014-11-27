@@ -306,3 +306,78 @@ class TestSchema(unittest.TestCase):
         # When/Then
         with self.assertRaises(ValidationError):
             jsonschema.validate(test_data, SCHEMA)
+
+    def test_schema_assertions(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+        ---
+          version: '1.0'
+
+          config:
+            host: test.domain
+
+          groups:
+            - name: "Basic"
+              tests:
+                - name: "Default method"
+                  url: "/"
+                  assertions:
+                    - name: status_code
+                      expected: 200
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # Validation succeeds
+        jsonschema.validate(test_data, SCHEMA)
+
+    def test_schema_invalid_assertions(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+        ---
+          version: '1.0'
+
+          config:
+            host: test.domain
+
+          groups:
+            - name: "Basic"
+              tests:
+                - name: "Default method"
+                  url: "/"
+                  assertions:
+                    name: status_code
+                    expected: 200
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # Validation succeeds
+        with self.assertRaises(ValidationError):
+            jsonschema.validate(test_data, SCHEMA)
+
+    def test_schema_empty_assertions(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+        ---
+          version: '1.0'
+
+          config:
+            host: test.domain
+
+          groups:
+            - name: "Basic"
+              tests:
+                - name: "Default method"
+                  url: "/"
+                  assertions: []
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # Validation succeeds
+        with self.assertRaises(ValidationError):
+            jsonschema.validate(test_data, SCHEMA)
