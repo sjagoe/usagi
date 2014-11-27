@@ -86,7 +86,7 @@ class YamlTestLoader(object):
     def load_tests_from_file(self, filename):
         with open(filename) as fh:
             test_structure = yaml.safe_load(fh)
-        self.load_tests_from_yaml(test_structure, filename)
+        return self.load_tests_from_yaml(test_structure, filename)
 
     def load_tests_from_yaml(self, test_structure, filename):
         loader = self._loader
