@@ -66,6 +66,5 @@ class WebTest(object):
             )
         except ConnectionError as exc:
             case.fail('Unable to connect: {!r}'.format(str(exc)))
-            return
         for assertion in self.assertions:
             assertion.run(case, response)

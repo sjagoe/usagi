@@ -141,7 +141,9 @@ class TestWebTest(unittest.TestCase):
 
         # When
         case = Mock()
-        test.run(case)
+        case.fail.side_effect = AssertionError
+        with self.assertRaises(AssertionError):
+            test.run(case)
 
         # Then
         self.assertTrue(case.fail.called)
