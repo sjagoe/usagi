@@ -35,6 +35,9 @@ class TestYamlTestLoader(unittest.TestCase):
         ---
           version: '1.0'
 
+          config:
+            host: test.domain
+
           groups:
             - name: "Basic"
               tests:
@@ -74,6 +77,9 @@ class TestYamlTestLoader(unittest.TestCase):
         ---
           version: '1.0'
 
+          config:
+            host: test.domain
+
           groups:
             - name: "Basic"
               tests:
@@ -84,6 +90,9 @@ class TestYamlTestLoader(unittest.TestCase):
         test_yaml_2 = textwrap.dedent("""
         ---
           version: '1.0'
+
+          config:
+            host: test.domain
 
           groups:
             - name: "A group"
@@ -120,6 +129,9 @@ class TestYamlTestLoader(unittest.TestCase):
         ---
           version: '1.0'
 
+          config:
+            host: test.domain
+
           groups:
             - name: "Basic"
               tests:
@@ -130,6 +142,9 @@ class TestYamlTestLoader(unittest.TestCase):
         test_yaml_2 = textwrap.dedent("""
         ---
           version: '1.0'
+
+          config:
+            host: test.domain
 
           groups:
             - name: "A group"

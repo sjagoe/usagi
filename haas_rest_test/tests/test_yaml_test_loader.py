@@ -32,6 +32,9 @@ class TestYamlTestLoader(unittest.TestCase):
         ---
           version: '1.0'
 
+          config:
+            host: test.domain
+
           groups:
             - name: "Basic"
               tests:
@@ -70,6 +73,9 @@ class TestYamlTestLoader(unittest.TestCase):
         ---
           version: '1.0'
 
+          config:
+            host: test.domain
+
           groups:
             - name: "Basic"
               tests:
@@ -104,6 +110,9 @@ class TestYamlTestLoader(unittest.TestCase):
         test_yaml = textwrap.dedent("""
         ---
           version: '1.0'
+
+          config:
+            host: test.domain
 
           tests:
             - name: "Test root URL"
@@ -145,6 +154,9 @@ class TestYamlTestLoader(unittest.TestCase):
         test_yaml = textwrap.dedent("""
         ---
           version: '1.0'
+
+          config:
+            host: test.domain
 
           groups:
             - name: "Basic"

@@ -138,10 +138,6 @@ class TestSchema(unittest.TestCase):
 
           config:
             host: test.domain
-            variables:
-              api: "/api/v0/json"
-              data: "/api/v0/json/data"
-              upload: "/api/v0/json/upload"
 
           groups:
             - name: "Basic"
@@ -274,6 +270,27 @@ class TestSchema(unittest.TestCase):
               api: "/api/v0/json"
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
+
+          groups:
+            - name: "Basic"
+              tests:
+                - name: "Test"
+                  url: "/"
+                  expected_status: [200]
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # When/Then
+        with self.assertRaises(ValidationError):
+            jsonschema.validate(test_data, SCHEMA)
+
+    def test_schema_missing_config(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+        ---
+          version: '1.0'
 
           groups:
             - name: "Basic"

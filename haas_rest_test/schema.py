@@ -35,7 +35,7 @@ SCHEMA = {
             'items': {'$ref': '#/definitions/group'},
         },
     },
-    'required': ['version', 'groups'],
+    'required': ['version', 'config', 'groups'],
     'definitions': {
         'name': {
             'description': 'The name of the object',
