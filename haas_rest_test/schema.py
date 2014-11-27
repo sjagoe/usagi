@@ -20,7 +20,15 @@ SCHEMA = {
             'description': 'Configuration applied to all generated test cases',
             'properties': {
                 'variables': {'type': 'object'},
-            }
+                'scheme': {
+                    'enum': ['http', 'https'],
+                    'default': 'http',
+                },
+                'host': {
+                    'type': 'string',
+                },
+            },
+            'required': ['host'],
         },
         'groups': {
             'type': 'array',
