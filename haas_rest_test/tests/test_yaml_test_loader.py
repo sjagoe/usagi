@@ -26,7 +26,8 @@ class TestSchema(unittest.TestCase):
           version: '1.0'
 
           config:
-            variable_binds:
+            variables:
+              api: "/api/v0/json"
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
 
@@ -62,7 +63,8 @@ class TestSchema(unittest.TestCase):
           version: '1.0'
 
           config:
-            variable_binds:
+            variables:
+              api: "/api/v0/json"
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
 
@@ -81,7 +83,8 @@ class TestSchema(unittest.TestCase):
           version: '1.0'
 
           config:
-            variable_binds:
+            variables:
+              api: "/api/v0/json"
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
 
@@ -110,7 +113,8 @@ class TestSchema(unittest.TestCase):
           version: '1.0'
 
           config:
-            variable_binds:
+            variables:
+              api: "/api/v0/json"
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
 
