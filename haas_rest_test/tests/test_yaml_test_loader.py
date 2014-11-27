@@ -44,18 +44,15 @@ class TestYamlTestLoader(unittest.TestCase):
               tests:
                 - name: "Test root URL"
                   url: "/"
-                  expected_status: [200]
 
             - name: "A group"
               tests:
                 - name: "Download authorization failure"
                   url:
                     template: "{data}/test"
-                  expected_status: [404]
                 - name: "Upload authorization failure"
                   url:
                     template: "/foo/{upload}/test"
-                  expected_status: [404]
 
         """)
 
@@ -177,7 +174,6 @@ class TestYamlTestLoader(unittest.TestCase):
           tests:
             - name: "Test root URL"
               url: "/"
-              expected_status: [200]
 
         """)
 
@@ -223,7 +219,6 @@ class TestYamlTestLoader(unittest.TestCase):
               tests:
                 - name: "Test root URL"
                   url: "/"
-                  expected_status: [200]
 
         """)
 

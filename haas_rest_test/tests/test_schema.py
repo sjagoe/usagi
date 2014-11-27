@@ -37,18 +37,15 @@ class TestSchema(unittest.TestCase):
               tests:
                 - name: "Test root URL"
                   url: "/"
-                  expected_status: [200]
 
             - name: "A group"
               tests:
                 - name: "Download authorization failure"
                   url:
                     template: "{data}/test"
-                  expected_status: [404]
                 - name: "Upload authorization failure"
                   url:
                     template: "/foo/{upload}/test"
-                  expected_status: [404]
 
         """)
 
@@ -75,23 +72,18 @@ class TestSchema(unittest.TestCase):
               tests:
                 - name: "GET"
                   url: "/"
-                  expected_status: [200]
                   method: GET
                 - name: "POST"
                   url: "/"
-                  expected_status: [200]
                   method: POST
                 - name: "DELETE"
                   url: "/"
-                  expected_status: [200]
                   method: DELETE
                 - name: "PUT"
                   url: "/"
-                  expected_status: [200]
                   method: PUT
                 - name: "HEAD"
                   url: "/"
-                  expected_status: [200]
                   method: HEAD
 
         """)
@@ -119,7 +111,6 @@ class TestSchema(unittest.TestCase):
               tests:
                 - name: "NO_SUCH_METHOD"
                   url: "/"
-                  expected_status: [200]
                   method: NO_SUCH_METHOD
 
         """)
@@ -144,7 +135,6 @@ class TestSchema(unittest.TestCase):
               tests:
                 - name: "Default method"
                   url: "/"
-                  expected_status: [200]
 
         """)
 
@@ -191,11 +181,9 @@ class TestSchema(unittest.TestCase):
             - name: "Download authorization failure"
               url:
                 template: "{data}/test"
-              expected_status: [404]
             - name: "Upload authorization failure"
               url:
                 template: "/foo/{upload}/test"
-              expected_status: [404]
 
         """)
 
@@ -221,7 +209,6 @@ class TestSchema(unittest.TestCase):
           name: "Download authorization failure"
           url:
             template: "{data}/test"
-          expected_status: [404]
 
         """)
 
@@ -248,7 +235,6 @@ class TestSchema(unittest.TestCase):
               tests:
                 - name: "Test"
                   url: "/"
-                  expected_status: [200]
 
         """)
 
@@ -276,7 +262,6 @@ class TestSchema(unittest.TestCase):
               tests:
                 - name: "Test"
                   url: "/"
-                  expected_status: [200]
 
         """)
 
@@ -297,7 +282,6 @@ class TestSchema(unittest.TestCase):
               tests:
                 - name: "Test"
                   url: "/"
-                  expected_status: [200]
 
         """)
 
