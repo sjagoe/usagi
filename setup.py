@@ -107,9 +107,7 @@ if not is_released:
 if __name__ == "__main__":
     install_requires = ['stevedore', 'six']
     if sys.version_info < (2, 7):
-        install_requires += ['unittest2', 'argparse', 'ordereddict']
-    if sys.version_info < (3, 4):
-        install_requires += ['enum34']
+        install_requires += ['unittest2']
 
     write_version_py()
     from haas_rest_test import __version__
