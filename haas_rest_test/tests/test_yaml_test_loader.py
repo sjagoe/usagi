@@ -8,6 +8,7 @@ from __future__ import absolute_import, unicode_literals
 
 import textwrap
 
+import responses
 import yaml
 
 from haas.discoverer import find_test_cases
@@ -70,6 +71,7 @@ class TestYamlTestLoader(unittest.TestCase):
         for case in find_test_cases(suite):
             self.assertIsInstance(case, unittest.TestCase)
 
+    @responses.activate
     def test_execute_single_case(self):
         # Given
         test_yaml = textwrap.dedent("""
@@ -84,9 +86,17 @@ class TestYamlTestLoader(unittest.TestCase):
               tests:
                 - name: "Test root URL"
                   url: "/"
-                  expected_status: [200]
+                  assertions:
+                    - name: status_code
+                      expected: 200
 
         """)
+
+        responses.add(
+            responses.GET,
+            'http://test.domain/',
+            status=200,
+        )
 
         test_data = yaml.safe_load(test_yaml)
 
@@ -106,7 +116,7 @@ class TestYamlTestLoader(unittest.TestCase):
         case(result)
 
         # Then
-        self.assertFalse(result.wasSuccessful())
+        self.assertTrue(result.wasSuccessful())
 
     def test_load_invalid_yaml_tests(self):
         # Given

@@ -46,7 +46,7 @@ def _create_yaml_parse_error_test(filename, error):
 
 def _create_test_method(test):
     def test_method(self):
-        self.fail()
+        test.run(self)
 
     test_method.__doc__ = test.name
 
