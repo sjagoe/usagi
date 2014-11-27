@@ -1,7 +1,9 @@
 [run]
 branch = True
 source = haas_rest_test
-omit = */tests/*
+omit =
+    */tests/*
+    haas_rest_test/_version.py
 
 [report]
 # Regexes for lines to exclude from consideration
