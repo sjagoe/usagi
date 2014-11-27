@@ -64,8 +64,12 @@ SCHEMA = {
         'test': {
             'type': 'object',
             'properties': {
+                'method': {
+                    'enum': ['GET', 'POST', 'DELETE', 'PUT', 'HEAD'],
+                    'default': 'GET',
+                },
                 'url': {
-                    "oneOf": [
+                    'oneOf': [
                         {'$ref': '#/definitions/url'},
                         {'$ref': '#/definitions/url_template'},
                     ],

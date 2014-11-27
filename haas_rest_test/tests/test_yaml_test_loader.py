@@ -63,6 +63,77 @@ class TestSchema(unittest.TestCase):
         # Validation succeeds
         jsonschema.validate(test_data, SCHEMA)
 
+    def test_schema_method(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+        ---
+          version: '1.0'
+
+          config:
+            variables:
+              api: "/api/v0/json"
+              data: "/api/v0/json/data"
+              upload: "/api/v0/json/upload"
+
+          groups:
+            - name: "Basic"
+              tests:
+                - name: "GET"
+                  url: "/"
+                  expected_status: [200]
+                  method: GET
+                - name: "POST"
+                  url: "/"
+                  expected_status: [200]
+                  method: POST
+                - name: "DELETE"
+                  url: "/"
+                  expected_status: [200]
+                  method: DELETE
+                - name: "PUT"
+                  url: "/"
+                  expected_status: [200]
+                  method: PUT
+                - name: "HEAD"
+                  url: "/"
+                  expected_status: [200]
+                  method: HEAD
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # Validation succeeds
+        jsonschema.validate(test_data, SCHEMA)
+
+    def test_schema_invalid_method(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+        ---
+          version: '1.0'
+
+          config:
+            variables:
+              api: "/api/v0/json"
+              data: "/api/v0/json/data"
+              upload: "/api/v0/json/upload"
+
+          groups:
+            - name: "Basic"
+              tests:
+                - name: "NO_SUCH_METHOD"
+                  url: "/"
+                  expected_status: [200]
+                  method: NO_SUCH_METHOD
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # Validation succeeds
+        with self.assertRaises(ValidationError):
+            jsonschema.validate(test_data, SCHEMA)
+
     def test_schema_no_groups(self):
         # Given
         test_yaml = textwrap.dedent("""
