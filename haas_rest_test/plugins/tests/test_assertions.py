@@ -6,7 +6,7 @@
 # of the 3-clause BSD license.  See the LICENSE.txt file for details.
 from __future__ import absolute_import, unicode_literals
 
-import jsonschema
+from mock import Mock
 
 from haas.testing import unittest
 
@@ -64,3 +64,29 @@ class TestStatusCodeAssertion(unittest.TestCase):
         # When/Then
         with self.assertRaises(YamlParseError):
             StatusCodeAssertion.from_dict(data)
+
+    def test_failed_assertion(self):
+        # Given
+        response = Mock()
+        response.status_code = 400
+        case = Mock()
+        assertion = StatusCodeAssertion(200)
+
+        # When
+        assertion.run(case, response)
+
+        # Then
+        case.assertEqual.assert_called_once_with(400, 200)
+
+    def test_valid_assertion(self):
+        # Given
+        response = Mock()
+        response.status_code = 200
+        case = Mock()
+        assertion = StatusCodeAssertion(200)
+
+        # When
+        assertion.run(case, response)
+
+        # Then
+        case.assertEqual.assert_called_once_with(200, 200)
