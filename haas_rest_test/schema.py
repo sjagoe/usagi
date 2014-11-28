@@ -19,7 +19,7 @@ SCHEMA = {
             'type': 'object',
             'description': 'Configuration applied to all generated test cases',
             'properties': {
-                'variables': {'type': 'object'},
+                'vars': {'type': 'object'},
                 'scheme': {
                     'enum': ['http', 'https'],
                     'default': 'http',
