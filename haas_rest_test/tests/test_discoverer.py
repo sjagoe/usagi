@@ -19,7 +19,7 @@ from haas.testing import unittest
 from ..discoverer import RestTestDiscoverer
 
 
-class TestYamlTestLoader(unittest.TestCase):
+class TestDiscoverer(unittest.TestCase):
 
     def setUp(self):
         self.discoverer = RestTestDiscoverer(Loader())
