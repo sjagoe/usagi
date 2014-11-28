@@ -44,7 +44,7 @@ class TestDiscoverer(unittest.TestCase):
                 - name: "Test root URL"
                   url: "/"
 
-            - name: "A group"
+            - name: "A case"
               tests:
                 - name: "Download authorization failure"
                   url:
@@ -91,7 +91,7 @@ class TestDiscoverer(unittest.TestCase):
             host: test.domain
 
           cases:
-            - name: "A group"
+            - name: "A case"
               tests:
                 - name: "Download authorization failure"
                   url:
@@ -140,7 +140,7 @@ class TestDiscoverer(unittest.TestCase):
             host: test.domain
 
           cases:
-            - name: "A group"
+            - name: "A case"
               tests:
                 - name: "Download authorization failure"
                   url:

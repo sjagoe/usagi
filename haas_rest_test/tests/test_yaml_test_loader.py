@@ -45,7 +45,7 @@ class TestYamlTestLoader(unittest.TestCase):
                 - name: "Test root URL"
                   url: "/"
 
-            - name: "A group"
+            - name: "A case"
               tests:
                 - name: "Download authorization failure"
                   url:
