@@ -147,5 +147,8 @@ if __name__ == "__main__":
         packages=['haas_rest_test'],
         install_requires=install_requires,
         entry_points={
+            'haas_rest_test.assertions': [
+                'status_code = haas_rest_test.plugins.assertions:StatusCodeAssertion',  # noqa
+            ],
         },
     )

@@ -4,3 +4,7 @@ class HaasRestTestError(Exception):
 
 class YamlParseError(HaasRestTestError):
     pass
+
+
+class InvalidAssertionClass(HaasRestTestError):
+    pass

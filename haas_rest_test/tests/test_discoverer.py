@@ -35,23 +35,23 @@ class TestYamlTestLoader(unittest.TestCase):
         ---
           version: '1.0'
 
+          config:
+            host: test.domain
+
           groups:
             - name: "Basic"
               tests:
                 - name: "Test root URL"
                   url: "/"
-                  expected_status: [200]
 
             - name: "A group"
               tests:
                 - name: "Download authorization failure"
                   url:
                     template: "{data}/test"
-                  expected_status: [404]
                 - name: "Upload authorization failure"
                   url:
                     template: "/foo/{upload}/test"
-                  expected_status: [404]
 
         """)
         with tempfile.NamedTemporaryFile(
@@ -74,16 +74,21 @@ class TestYamlTestLoader(unittest.TestCase):
         ---
           version: '1.0'
 
+          config:
+            host: test.domain
+
           groups:
             - name: "Basic"
               tests:
                 - name: "Test root URL"
                   url: "/"
-                  expected_status: [200]
         """)
         test_yaml_2 = textwrap.dedent("""
         ---
           version: '1.0'
+
+          config:
+            host: test.domain
 
           groups:
             - name: "A group"
@@ -91,11 +96,9 @@ class TestYamlTestLoader(unittest.TestCase):
                 - name: "Download authorization failure"
                   url:
                     template: "{data}/test"
-                  expected_status: [404]
                 - name: "Upload authorization failure"
                   url:
                     template: "/foo/{upload}/test"
-                  expected_status: [404]
 
         """)
         with tempfile.NamedTemporaryFile(
@@ -120,16 +123,21 @@ class TestYamlTestLoader(unittest.TestCase):
         ---
           version: '1.0'
 
+          config:
+            host: test.domain
+
           groups:
             - name: "Basic"
               tests:
                 - name: "Test root URL"
                   url: "/"
-                  expected_status: [200]
         """)
         test_yaml_2 = textwrap.dedent("""
         ---
           version: '1.0'
+
+          config:
+            host: test.domain
 
           groups:
             - name: "A group"
@@ -137,11 +145,9 @@ class TestYamlTestLoader(unittest.TestCase):
                 - name: "Download authorization failure"
                   url:
                     template: "{data}/test"
-                  expected_status: [404]
                 - name: "Upload authorization failure"
                   url:
                     template: "/foo/{upload}/test"
-                  expected_status: [404]
 
         """)
         with tempfile.NamedTemporaryFile(

@@ -8,8 +8,7 @@ from __future__ import absolute_import, unicode_literals
 
 import textwrap
 
-from jsonschema.exceptions import ValidationError
-import jsonschema
+import responses
 import yaml
 
 from haas.discoverer import find_test_cases
@@ -20,123 +19,7 @@ from haas.suite import TestSuite
 from haas.testing import unittest
 
 from ..exceptions import YamlParseError
-from ..schema import SCHEMA
 from ..yaml_test_loader import YamlTestLoader
-
-
-class TestSchema(unittest.TestCase):
-
-    def test_schema(self):
-        # Given
-        test_yaml = textwrap.dedent("""
-        ---
-          version: '1.0'
-
-          config:
-            variables:
-              api: "/api/v0/json"
-              data: "/api/v0/json/data"
-              upload: "/api/v0/json/upload"
-
-          groups:
-            - name: "Basic"
-              tests:
-                - name: "Test root URL"
-                  url: "/"
-                  expected_status: [200]
-
-            - name: "A group"
-              tests:
-                - name: "Download authorization failure"
-                  url:
-                    template: "{data}/test"
-                  expected_status: [404]
-                - name: "Upload authorization failure"
-                  url:
-                    template: "/foo/{upload}/test"
-                  expected_status: [404]
-
-        """)
-
-        test_data = yaml.safe_load(test_yaml)
-
-        # Validation succeeds
-        jsonschema.validate(test_data, SCHEMA)
-
-    def test_schema_no_groups(self):
-        # Given
-        test_yaml = textwrap.dedent("""
-        ---
-          version: '1.0'
-
-          config:
-            variables:
-              api: "/api/v0/json"
-              data: "/api/v0/json/data"
-              upload: "/api/v0/json/upload"
-
-        """)
-
-        test_data = yaml.safe_load(test_yaml)
-
-        # When/Then
-        with self.assertRaises(ValidationError):
-            jsonschema.validate(test_data, SCHEMA)
-
-    def test_schema_top_level_tests(self):
-        # Given
-        test_yaml = textwrap.dedent("""
-        ---
-          version: '1.0'
-
-          config:
-            variables:
-              api: "/api/v0/json"
-              data: "/api/v0/json/data"
-              upload: "/api/v0/json/upload"
-
-          tests:
-            - name: "Download authorization failure"
-              url:
-                template: "{data}/test"
-              expected_status: [404]
-            - name: "Upload authorization failure"
-              url:
-                template: "/foo/{upload}/test"
-              expected_status: [404]
-
-        """)
-
-        test_data = yaml.safe_load(test_yaml)
-
-        # When/Then
-        with self.assertRaises(ValidationError):
-            jsonschema.validate(test_data, SCHEMA)
-
-    def test_schema_top_level_single_test(self):
-        # Given
-        test_yaml = textwrap.dedent("""
-        ---
-          version: '1.0'
-
-          config:
-            variables:
-              api: "/api/v0/json"
-              data: "/api/v0/json/data"
-              upload: "/api/v0/json/upload"
-
-          name: "Download authorization failure"
-          url:
-            template: "{data}/test"
-          expected_status: [404]
-
-        """)
-
-        test_data = yaml.safe_load(test_yaml)
-
-        # When/Then
-        with self.assertRaises(ValidationError):
-            jsonschema.validate(test_data, SCHEMA)
 
 
 class TestYamlTestLoader(unittest.TestCase):
@@ -144,29 +27,32 @@ class TestYamlTestLoader(unittest.TestCase):
     def setUp(self):
         self.loader = YamlTestLoader(Loader())
 
+    def test_plugins_loaded(self):
+        self.assertIn('status_code', self.loader._assertions_map)
+
     def test_load_yaml_tests(self):
         # Given
         test_yaml = textwrap.dedent("""
         ---
           version: '1.0'
 
+          config:
+            host: test.domain
+
           groups:
             - name: "Basic"
               tests:
                 - name: "Test root URL"
                   url: "/"
-                  expected_status: [200]
 
             - name: "A group"
               tests:
                 - name: "Download authorization failure"
                   url:
                     template: "{data}/test"
-                  expected_status: [404]
                 - name: "Upload authorization failure"
                   url:
                     template: "/foo/{upload}/test"
-                  expected_status: [404]
 
         """)
 
@@ -182,20 +68,79 @@ class TestYamlTestLoader(unittest.TestCase):
         for case in find_test_cases(suite):
             self.assertIsInstance(case, unittest.TestCase)
 
+    @responses.activate
     def test_execute_single_case(self):
         # Given
         test_yaml = textwrap.dedent("""
         ---
           version: '1.0'
 
+          config:
+            host: test.domain
+
           groups:
             - name: "Basic"
               tests:
                 - name: "Test root URL"
                   url: "/"
-                  expected_status: [200]
+                  assertions:
+                    - name: status_code
+                      expected: 200
 
         """)
+
+        responses.add(
+            responses.GET,
+            'http://test.domain/',
+            status=200,
+        )
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # When
+        suite = self.loader.load_tests_from_yaml(
+            test_data, '/path/to/foo.yaml')
+
+        # Then
+        self.assertIsInstance(suite, TestSuite)
+        self.assertEqual(suite.countTestCases(), 1)
+        case = next(find_test_cases(suite))
+
+        # Given
+        result = ResultCollecter()
+
+        # When
+        case(result)
+
+        # Then
+        self.assertTrue(result.wasSuccessful())
+
+    @responses.activate
+    def test_execute_single_case_failure(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+        ---
+          version: '1.0'
+
+          config:
+            host: test.domain
+
+          groups:
+            - name: "Basic"
+              tests:
+                - name: "Test root URL"
+                  url: "/"
+                  assertions:
+                    - name: status_code
+                      expected: 200
+
+        """)
+
+        responses.add(
+            responses.GET,
+            'http://test.domain/',
+            status=400,
+        )
 
         test_data = yaml.safe_load(test_yaml)
 
@@ -223,10 +168,12 @@ class TestYamlTestLoader(unittest.TestCase):
         ---
           version: '1.0'
 
+          config:
+            host: test.domain
+
           tests:
             - name: "Test root URL"
               url: "/"
-              expected_status: [200]
 
         """)
 
@@ -264,12 +211,14 @@ class TestYamlTestLoader(unittest.TestCase):
         ---
           version: '1.0'
 
+          config:
+            host: test.domain
+
           groups:
             - name: "Basic"
               tests:
                 - name: "Test root URL"
                   url: "/"
-                  expected_status: [200]
 
         """)
 

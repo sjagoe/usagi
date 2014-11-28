@@ -20,14 +20,22 @@ SCHEMA = {
             'description': 'Configuration applied to all generated test cases',
             'properties': {
                 'variables': {'type': 'object'},
-            }
+                'scheme': {
+                    'enum': ['http', 'https'],
+                    'default': 'http',
+                },
+                'host': {
+                    'type': 'string',
+                },
+            },
+            'required': ['host'],
         },
         'groups': {
             'type': 'array',
             'items': {'$ref': '#/definitions/group'},
         },
     },
-    'required': ['version', 'groups'],
+    'required': ['version', 'config', 'groups'],
     'definitions': {
         'name': {
             'description': 'The name of the object',
@@ -64,14 +72,22 @@ SCHEMA = {
         'test': {
             'type': 'object',
             'properties': {
+                'method': {
+                    'enum': ['GET', 'POST', 'DELETE', 'PUT', 'HEAD'],
+                    'default': 'GET',
+                },
                 'url': {
-                    "oneOf": [
+                    'oneOf': [
                         {'$ref': '#/definitions/url'},
                         {'$ref': '#/definitions/url_template'},
                     ],
                 },
                 'name': {
                     '$ref': '#/definitions/name',
+                },
+                'assertions': {
+                    'type': 'array',
+                    'minItems': 1,
                 },
             },
             'required': ['url', 'name'],

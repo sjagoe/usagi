@@ -9,29 +9,25 @@ from __future__ import absolute_import, unicode_literals
 import logging
 
 from jsonschema.exceptions import ValidationError
-from requests.utils import default_user_agent as requests_user_agent
 import jsonschema
-import requests
 import six
+from stevedore.extension import ExtensionManager
 import yaml
 
 from haas.module_import_error import ModuleImportError
 from haas.testing import unittest
 
-import haas_rest_test
+from .config import Config
 from .exceptions import YamlParseError
 from .schema import SCHEMA
+from .utils import create_session
+from .web_test import WebTest
 
 
 logger = logging.getLogger(__name__)
 
 
 TEST_NAME_ATTRIBUTE = 'haas_rest_test_name'
-
-
-def haas_rest_test_user_agent():
-    return 'haas-rest-test/{0} {1}'.format(
-        haas_rest_test.__version__, requests_user_agent())
 
 
 def _create_yaml_parse_error_test(filename, error):
@@ -48,22 +44,23 @@ def _create_yaml_parse_error_test(filename, error):
     return cls(method_name)
 
 
-def _create_test_method(requests_session, test_spec):
+def _create_test_method(test):
     def test_method(self):
-        self.fail()
+        test.run(self)
 
-    test_method.__doc__ = test_spec['name']
+    test_method.__doc__ = test.name
 
     return test_method
 
 
-def create_test_case_for_group(filename, group):
-    session = requests.Session()
-    session.headers['User-Agent'] = haas_rest_test_user_agent()
+def create_test_case_for_group(filename, config, group, assertions_map):
+    session = create_session()
 
+    tests = [WebTest.from_dict(session, spec, config, assertions_map)
+             for spec in group['tests']]
     class_dict = dict(
-        ('test_{0}'.format(index), _create_test_method(session, spec))
-        for index, spec in enumerate(group['tests'])
+        ('test_{0}'.format(index), _create_test_method(test))
+        for index, test in enumerate(tests)
     )
     class_dict[TEST_NAME_ATTRIBUTE] = group['name']
 
@@ -86,6 +83,13 @@ class YamlTestLoader(object):
     def __init__(self, loader):
         super(YamlTestLoader, self).__init__()
         self._loader = loader
+        assertions = ExtensionManager(
+            namespace='haas_rest_test.assertions',
+        )
+        self._assertions_map = dict(
+            (name, assertions[name].plugin)
+            for name in assertions.names()
+        )
 
     def load_tests_from_file(self, filename):
         with open(filename) as fh:
@@ -99,8 +103,10 @@ class YamlTestLoader(object):
         except ValidationError as e:
             test = _create_yaml_parse_error_test(filename, str(e))
             return loader.create_suite([test])
+        config = Config.from_dict(test_structure['config'])
         cases = (
-            create_test_case_for_group(filename, group)
+            create_test_case_for_group(
+                filename, config, group, self._assertions_map)
             for group in test_structure['groups']
         )
         tests = [loader.load_case(case) for case in cases]
