@@ -53,16 +53,16 @@ def _create_test_method(test):
     return test_method
 
 
-def create_test_case_for_group(filename, config, group, assertions_map):
+def create_test_case_for_case(filename, config, case, assertions_map):
     session = create_session()
 
     tests = [WebTest.from_dict(session, spec, config, assertions_map)
-             for spec in group['tests']]
+             for spec in case['tests']]
     class_dict = dict(
         ('test_{0}'.format(index), _create_test_method(test))
         for index, test in enumerate(tests)
     )
-    class_dict[TEST_NAME_ATTRIBUTE] = group['name']
+    class_dict[TEST_NAME_ATTRIBUTE] = case['name']
 
     def __str__(self):
         return '{0} ({1})'.format(
@@ -105,9 +105,9 @@ class YamlTestLoader(object):
             return loader.create_suite([test])
         config = Config.from_dict(test_structure['config'])
         cases = (
-            create_test_case_for_group(
-                filename, config, group, self._assertions_map)
-            for group in test_structure['groups']
+            create_test_case_for_case(
+                filename, config, case, self._assertions_map)
+            for case in test_structure['cases']
         )
         tests = [loader.load_case(case) for case in cases]
         return loader.create_suite(tests)

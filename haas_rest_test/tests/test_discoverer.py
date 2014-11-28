@@ -19,7 +19,7 @@ from haas.testing import unittest
 from ..discoverer import RestTestDiscoverer
 
 
-class TestYamlTestLoader(unittest.TestCase):
+class TestDiscoverer(unittest.TestCase):
 
     def setUp(self):
         self.discoverer = RestTestDiscoverer(Loader())
@@ -38,13 +38,13 @@ class TestYamlTestLoader(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Test root URL"
                   url: "/"
 
-            - name: "A group"
+            - name: "A case"
               tests:
                 - name: "Download authorization failure"
                   url:
@@ -77,7 +77,7 @@ class TestYamlTestLoader(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Test root URL"
@@ -90,8 +90,8 @@ class TestYamlTestLoader(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
-            - name: "A group"
+          cases:
+            - name: "A case"
               tests:
                 - name: "Download authorization failure"
                   url:
@@ -126,7 +126,7 @@ class TestYamlTestLoader(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Test root URL"
@@ -139,8 +139,8 @@ class TestYamlTestLoader(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
-            - name: "A group"
+          cases:
+            - name: "A case"
               tests:
                 - name: "Download authorization failure"
                   url:
