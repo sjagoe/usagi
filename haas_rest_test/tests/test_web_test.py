@@ -12,6 +12,7 @@ from six.moves import urllib
 
 from haas.testing import unittest
 
+from ..exceptions import InvalidAssertionClass
 from ..plugins.assertions import StatusCodeAssertion
 from ..config import Config
 from ..utils import create_session
@@ -79,6 +80,29 @@ class TestWebTest(unittest.TestCase):
         self.assertEqual(len(test.assertions), 1)
         assertion, = test.assertions
         self.assertIsInstance(assertion, StatusCodeAssertion)
+
+    def test_create_invlalid_assertions(self):
+        # Given
+        config = Config('http', 'test.invalid')
+        session = create_session()
+        name = 'A test'
+        url = '/api/test'
+        test_spec = {
+            'name': name,
+            'url': url,
+            'assertions': [
+                {
+                    'name': 'dont_exist',
+                },
+            ],
+        }
+        assertions = {
+            'status_code': StatusCodeAssertion,
+        }
+
+        # When/Then
+        with self.assertRaises(InvalidAssertionClass):
+            WebTest.from_dict(session, test_spec, config, assertions)
 
     @responses.activate
     def test_run(self):
