@@ -30,12 +30,12 @@ SCHEMA = {
             },
             'required': ['host'],
         },
-        'groups': {
+        'cases': {
             'type': 'array',
-            'items': {'$ref': '#/definitions/group'},
+            'items': {'$ref': '#/definitions/case'},
         },
     },
-    'required': ['version', 'config', 'groups'],
+    'required': ['version', 'config', 'cases'],
     'definitions': {
         'name': {
             'description': 'The name of the object',
@@ -52,7 +52,7 @@ SCHEMA = {
         'url': {
             'type': 'string',
         },
-        'group': {
+        'case': {
             'type': 'object',
             'description': 'A grouping of test cases',
             'properties': {

@@ -39,7 +39,7 @@ class TestYamlTestLoader(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Test root URL"
@@ -78,7 +78,7 @@ class TestYamlTestLoader(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Test root URL"
@@ -125,7 +125,7 @@ class TestYamlTestLoader(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Test root URL"
@@ -214,7 +214,7 @@ class TestYamlTestLoader(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Test root URL"

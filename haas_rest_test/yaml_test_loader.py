@@ -107,7 +107,7 @@ class YamlTestLoader(object):
         cases = (
             create_test_case_for_group(
                 filename, config, group, self._assertions_map)
-            for group in test_structure['groups']
+            for group in test_structure['cases']
         )
         tests = [loader.load_case(case) for case in cases]
         return loader.create_suite(tests)

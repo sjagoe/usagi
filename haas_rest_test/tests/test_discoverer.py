@@ -38,7 +38,7 @@ class TestYamlTestLoader(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Test root URL"
@@ -77,7 +77,7 @@ class TestYamlTestLoader(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Test root URL"
@@ -90,7 +90,7 @@ class TestYamlTestLoader(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
+          cases:
             - name: "A group"
               tests:
                 - name: "Download authorization failure"
@@ -126,7 +126,7 @@ class TestYamlTestLoader(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Test root URL"
@@ -139,7 +139,7 @@ class TestYamlTestLoader(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
+          cases:
             - name: "A group"
               tests:
                 - name: "Download authorization failure"
