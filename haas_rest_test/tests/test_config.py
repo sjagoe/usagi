@@ -40,7 +40,7 @@ class TestTemplateVariables(unittest.TestCase):
         }
 
         # When
-        templated_vars = _template_variables(variables)
+        templated_vars = _template_variables(variables, __file__)
 
         self.assertEqual(templated_vars, expected)
 
@@ -57,9 +57,35 @@ class TestTemplateVariables(unittest.TestCase):
 
         # When
         with self.environment(ENV_VAR='/another/path'):
-            templated_vars = _template_variables(variables)
+            templated_vars = _template_variables(variables, __file__)
 
         self.assertEqual(templated_vars, expected)
+
+    def test_var_from_file(self):
+        # Given
+        variables = {
+            'var1': {'file': 'test_data.txt'},
+            'var2': {'file': 'test_data.json', 'format': 'json'},
+        }
+        expected = {
+            'var1': 'Test plain text!\n',
+            'var2': {'test': 'json'},
+        }
+
+        # When
+        templated_vars = _template_variables(variables, __file__)
+
+        self.assertEqual(templated_vars, expected)
+
+    def test_var_invalid_file_format(self):
+        # Given
+        variables = {
+            'var1': {'file': 'test_data.txt', 'format': 'unknown'},
+        }
+
+        # When
+        with self.assertRaises(InvalidVariable):
+            _template_variables(variables, __file__)
 
     def test_env_in_template(self):
         # Given
@@ -76,7 +102,7 @@ class TestTemplateVariables(unittest.TestCase):
 
         # When
         with self.environment(ENV_VAR='/another/path'):
-            templated_vars = _template_variables(variables)
+            templated_vars = _template_variables(variables, __file__)
 
         self.assertEqual(templated_vars, expected)
 
@@ -96,7 +122,7 @@ class TestTemplateVariables(unittest.TestCase):
         }
 
         # When
-        templated_vars = _template_variables(variables)
+        templated_vars = _template_variables(variables, __file__)
 
         self.assertEqual(templated_vars, expected)
 
@@ -114,7 +140,7 @@ class TestTemplateVariables(unittest.TestCase):
         }
 
         # When
-        templated_vars = _template_variables(variables)
+        templated_vars = _template_variables(variables, __file__)
 
         self.assertEqual(templated_vars, expected)
 
@@ -132,7 +158,7 @@ class TestTemplateVariables(unittest.TestCase):
         }
 
         # When
-        templated_vars = _template_variables(variables)
+        templated_vars = _template_variables(variables, __file__)
 
         self.assertEqual(templated_vars, expected)
 
@@ -145,7 +171,7 @@ class TestTemplateVariables(unittest.TestCase):
 
         # When
         with self.assertRaises(VariableLoopError):
-            _template_variables(variables)
+            _template_variables(variables, __file__)
 
     def test_invalid_type(self):
         # Given
@@ -155,7 +181,7 @@ class TestTemplateVariables(unittest.TestCase):
 
         # When
         with self.assertRaises(InvalidVariable):
-            _template_variables(variables)
+            _template_variables(variables, __file__)
 
     def test_host_from_env_var(self):
         # Given
@@ -166,7 +192,7 @@ class TestTemplateVariables(unittest.TestCase):
 
         # When
         with self.environment(ENV_VAR=expected):
-            config = Config.from_dict(config_dict)
+            config = Config.from_dict(config_dict, __file__)
 
         # Then
         self.assertEqual(config.host, expected)
@@ -180,7 +206,7 @@ class TestTemplateVariables(unittest.TestCase):
         expected = 'host.domain'
 
         # When
-        config = Config.from_dict(config_dict)
+        config = Config.from_dict(config_dict, __file__)
 
         # Then
         self.assertEqual(config.host, expected)

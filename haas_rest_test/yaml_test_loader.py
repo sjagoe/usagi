@@ -103,7 +103,7 @@ class YamlTestLoader(object):
         except ValidationError as e:
             test = _create_yaml_parse_error_test(filename, str(e))
             return loader.create_suite([test])
-        config = Config.from_dict(test_structure['config'])
+        config = Config.from_dict(test_structure['config'], filename)
         cases = (
             create_test_case_for_case(
                 filename, config, case, self._assertions_map)

@@ -23,7 +23,7 @@ class TestWebTest(unittest.TestCase):
 
     def test_from_dict(self):
         # Given
-        config = Config.from_dict({'host': 'test.invalid'})
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
         session = create_session()
         name = 'A test'
         url = '/api/test'
@@ -55,7 +55,7 @@ class TestWebTest(unittest.TestCase):
 
     def test_create_with_assertions(self):
         # Given
-        config = Config.from_dict({'host': 'test.invalid'})
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
         session = create_session()
         name = 'A test'
         url = '/api/test'
@@ -83,7 +83,7 @@ class TestWebTest(unittest.TestCase):
 
     def test_create_invlalid_assertions(self):
         # Given
-        config = Config.from_dict({'host': 'test.invalid'})
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
         session = create_session()
         name = 'A test'
         url = '/api/test'
@@ -107,7 +107,7 @@ class TestWebTest(unittest.TestCase):
     @responses.activate
     def test_run(self):
         # Given
-        config = Config.from_dict({'host': 'test.invalid'})
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
         session = create_session()
         name = 'A test'
         url = '/api/test'
@@ -143,7 +143,7 @@ class TestWebTest(unittest.TestCase):
     # @responses.activate
     def test_connection_error(self):
         # Given
-        config = Config.from_dict({'host': 'test.invalid'})
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
         session = create_session()
         name = 'A test'
         url = '/api/test'
@@ -174,10 +174,13 @@ class TestWebTest(unittest.TestCase):
 
     def test_templating_url(self):
         # Given
-        config = Config.from_dict({
-            'host': 'test.invalid',
-            'vars': {'prefix': '/api'},
-        })
+        config = Config.from_dict(
+            {
+                'host': 'test.invalid',
+                'vars': {'prefix': '/api'},
+            },
+            __file__,
+        )
         session = create_session()
         name = 'A test'
         url = {'template': '{prefix}/test'}
@@ -204,10 +207,13 @@ class TestWebTest(unittest.TestCase):
 
     def test_invalid_url(self):
         # Given
-        config = Config.from_dict({
-            'host': 'test.invalid',
-            'vars': {'prefix': '/api'},
-        })
+        config = Config.from_dict(
+            {
+                'host': 'test.invalid',
+                'vars': {'prefix': '/api'},
+            },
+            __file__,
+        )
         session = create_session()
         name = 'A test'
         url = {'something': '{prefix}/test'}
