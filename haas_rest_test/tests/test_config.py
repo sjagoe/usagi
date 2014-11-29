@@ -96,3 +96,54 @@ class TestTemplateVariables(unittest.TestCase):
         templated_vars = template_variables(variables)
 
         self.assertEqual(templated_vars, expected)
+
+    def test_multiple_levels_ordering(self):
+        # Given
+        variables = {
+            'var1': '/some/path',
+            'var2': {'template': '{var1}/yet/another/path'},
+            'var3': {'template': '{var2}/another/path'},
+        }
+        expected = {
+            'var1': '/some/path',
+            'var2': '/some/path/yet/another/path',
+            'var3': '/some/path/yet/another/path/another/path',
+        }
+
+        # When
+        templated_vars = template_variables(variables)
+
+        self.assertEqual(templated_vars, expected)
+
+    def test_multiple_levels_ordering_2(self):
+        # Given
+        variables = {
+            'var1': {'template': '{var2}/yet/another/path'},
+            'var2': '/some/path',
+            'var3': {'template': '{var1}/another/path'},
+        }
+        expected = {
+            'var1': '/some/path/yet/another/path',
+            'var2': '/some/path',
+            'var3': '/some/path/yet/another/path/another/path',
+        }
+
+        # When
+        templated_vars = template_variables(variables)
+
+        self.assertEqual(templated_vars, expected)
+
+    def test_mutual_templating(self):
+        # Given
+        variables = {
+            'var1': {'template': '{var2}/another/path'},
+            'var2': {'template': '{var1}/yet/another/path'},
+        }
+        expected = {
+            'var1': '/some/path/another/path',
+            'var2': '/some/path/another/path/yet/another/path'
+        }
+
+        # When
+        with self.assertRaises(RuntimeError):
+            template_variables(variables)

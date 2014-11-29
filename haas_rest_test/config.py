@@ -21,41 +21,58 @@ def _dict_to_var(var_dict):
         return TEMPLATE, var_dict[TEMPLATE]
     elif ENV in var_dict:
         return ENV, var_dict[ENV]
-    raise RuntimeError()
+    raise RuntimeError('Unknown var type {!r}'.format(var_dict))
 
 
-def _fill_template(name, value, template_vars):
+def _resolve_simple_var(value):
     if isinstance(value, string_types):
-        return VAR, name, value
+        return VAR, value
     elif isinstance(value, dict):
         type_, value = _dict_to_var(value)
         if type_ == ENV:
-            new_value = os.environ[value]  # KeyError
-            return VAR, name, new_value
-        elif type_ == TEMPLATE:
-            try:
-                new_value = value.format(**template_vars)
-            except KeyError:
-                return TEMPLATE, name, value
-            if new_value == value:
-                return VAR, name, new_value
-            else:
-                return TEMPLATE, name, new_value
+            return VAR, os.environ[value]  # KeyError
         else:
-            raise RuntimeError('Can\'t handle var {!r} of type: {!r}'.format(
-                name, type_))
+            return type_, value
+
+
+def _resolve_simple_vars(variables):
+    simple_vars = {}
+    for name, var in variables.items():
+        type_, value = _resolve_simple_var(var)
+        if type_ != VAR:
+            continue
+        simple_vars[name] = value
+    return simple_vars
+
+
+def _fill_template(name, value, template_vars):
+    type_, value = _dict_to_var(value)
+    if type_ == TEMPLATE:
+        try:
+            new_value = value.format(**template_vars)
+        except KeyError:  # We don't have all dependencies resolved yet
+            return TEMPLATE, name, value
+        else:
+            try:
+                new_value.format()
+            except KeyError:  # We don't have all dependencies resolved yet
+                return TEMPLATE, name, new_value
+            else:
+                return VAR, name, new_value
     else:
-        raise RuntimeError('Can\'t handle var {!r}: {!r}'.format(name, value))
+        raise RuntimeError('Can\'t handle var {!r} of type: {!r}'.format(
+            name, type_))
 
 
-# FIXME: Very inefficient!
 def template_variables(variables):
     if variables is None:
         return {}
-    templated = {}
-    templates = variables.copy()
+    templated = _resolve_simple_vars(variables)
+    templates = dict((name, value) for name, value in variables.items()
+                     if name not in templated)
     while len(templates) > 0:
-        for name in templates.copy():
+        template_keys = set(templates.keys())
+        for name in sorted(list(templates)):
             value = templates.pop(name)
             type_, name, new_value = _fill_template(
                 name, value, templated)
@@ -63,6 +80,8 @@ def template_variables(variables):
                 templated[name] = new_value
             elif type_ == TEMPLATE:
                 templates[name] = {TEMPLATE: new_value}
+        if template_keys == set(templates.keys()):
+            raise RuntimeError('Loop detected in template vars')
 
     return templated
 
