@@ -64,7 +64,7 @@ def _fill_template(name, value, template_vars):
             name, type_))
 
 
-def template_variables(variables):
+def _template_variables(variables):
     if variables is None:
         return {}
     templated = _resolve_simple_vars(variables)
@@ -99,5 +99,5 @@ class Config(object):
         return cls(
             scheme=config.get('scheme', 'http'),
             host=config['host'],
-            variables=template_variables(config.get('vars')),
+            variables=_template_variables(config.get('vars')),
         )

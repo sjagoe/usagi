@@ -11,7 +11,7 @@ import os
 
 from haas.testing import unittest
 
-from ..config import template_variables
+from ..config import _template_variables
 
 
 class TestTemplateVariables(unittest.TestCase):
@@ -39,7 +39,7 @@ class TestTemplateVariables(unittest.TestCase):
         }
 
         # When
-        templated_vars = template_variables(variables)
+        templated_vars = _template_variables(variables)
 
         self.assertEqual(templated_vars, expected)
 
@@ -56,7 +56,7 @@ class TestTemplateVariables(unittest.TestCase):
 
         # When
         with self.environment(ENV_VAR='/another/path'):
-            templated_vars = template_variables(variables)
+            templated_vars = _template_variables(variables)
 
         self.assertEqual(templated_vars, expected)
 
@@ -75,7 +75,7 @@ class TestTemplateVariables(unittest.TestCase):
 
         # When
         with self.environment(ENV_VAR='/another/path'):
-            templated_vars = template_variables(variables)
+            templated_vars = _template_variables(variables)
 
         self.assertEqual(templated_vars, expected)
 
@@ -93,7 +93,7 @@ class TestTemplateVariables(unittest.TestCase):
         }
 
         # When
-        templated_vars = template_variables(variables)
+        templated_vars = _template_variables(variables)
 
         self.assertEqual(templated_vars, expected)
 
@@ -111,7 +111,7 @@ class TestTemplateVariables(unittest.TestCase):
         }
 
         # When
-        templated_vars = template_variables(variables)
+        templated_vars = _template_variables(variables)
 
         self.assertEqual(templated_vars, expected)
 
@@ -129,7 +129,7 @@ class TestTemplateVariables(unittest.TestCase):
         }
 
         # When
-        templated_vars = template_variables(variables)
+        templated_vars = _template_variables(variables)
 
         self.assertEqual(templated_vars, expected)
 
@@ -139,11 +139,7 @@ class TestTemplateVariables(unittest.TestCase):
             'var1': {'template': '{var2}/another/path'},
             'var2': {'template': '{var1}/yet/another/path'},
         }
-        expected = {
-            'var1': '/some/path/another/path',
-            'var2': '/some/path/another/path/yet/another/path'
-        }
 
         # When
         with self.assertRaises(RuntimeError):
-            template_variables(variables)
+            _template_variables(variables)
