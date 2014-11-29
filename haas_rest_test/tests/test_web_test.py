@@ -224,5 +224,9 @@ class TestWebTest(unittest.TestCase):
             test.run(case)
 
         # Then
-        case.fail.assert_called_once_with(
-            'InvalidVariable("{\'something\': \'{prefix}/test\'}",)')
+        self.assertEqual(case.fail.call_count, 1)
+        args, kwargs = case.fail.call_args
+        self.assertRegexpMatches(
+            args[0],
+            r"""InvalidVariable\("\{u?'something': u?'\{prefix\}/test'\}",\)"""
+        )
