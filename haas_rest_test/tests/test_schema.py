@@ -32,13 +32,13 @@ class TestSchema(unittest.TestCase):
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Test root URL"
                   url: "/"
 
-            - name: "A group"
+            - name: "A case"
               tests:
                 - name: "Download authorization failure"
                   url:
@@ -67,7 +67,7 @@ class TestSchema(unittest.TestCase):
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "GET"
@@ -106,7 +106,7 @@ class TestSchema(unittest.TestCase):
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "NO_SUCH_METHOD"
@@ -130,7 +130,7 @@ class TestSchema(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Default method"
@@ -143,7 +143,7 @@ class TestSchema(unittest.TestCase):
         # Validation succeeds
         jsonschema.validate(test_data, SCHEMA)
 
-    def test_schema_no_groups(self):
+    def test_schema_no_cases(self):
         # Given
         test_yaml = textwrap.dedent("""
         ---
@@ -230,7 +230,7 @@ class TestSchema(unittest.TestCase):
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Test"
@@ -257,7 +257,7 @@ class TestSchema(unittest.TestCase):
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Test"
@@ -277,7 +277,7 @@ class TestSchema(unittest.TestCase):
         ---
           version: '1.0'
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Test"
@@ -300,7 +300,7 @@ class TestSchema(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Default method"
@@ -325,7 +325,7 @@ class TestSchema(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Default method"
@@ -351,7 +351,7 @@ class TestSchema(unittest.TestCase):
           config:
             host: test.domain
 
-          groups:
+          cases:
             - name: "Basic"
               tests:
                 - name: "Default method"
