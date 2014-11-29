@@ -54,6 +54,9 @@ SCHEMA = {
             },
             'required': ['env'],
         },
+        'simple_var': {
+            'type': 'string',
+        },
         'template_var': {
             'type': 'object',
             'properties': {
@@ -62,9 +65,6 @@ SCHEMA = {
                 },
             },
             'required': ['template'],
-        },
-        'simple_var': {
-            'type': 'string',
         },
         'case': {
             'type': 'object',
