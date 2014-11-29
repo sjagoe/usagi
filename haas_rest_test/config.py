@@ -90,8 +90,8 @@ class Config(object):
     def __init__(self, scheme, host, variables):
         super(Config, self).__init__()
         self.scheme = scheme
-        self.host = host
         self.variables = variables
+        self.host = self.fill_template(host)
 
     @classmethod
     def from_dict(cls, config):

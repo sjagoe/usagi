@@ -11,7 +11,7 @@ import os
 
 from haas.testing import unittest
 
-from ..config import _template_variables
+from ..config import _template_variables, Config
 from ..exceptions import InvalidVariable, VariableLoopError
 
 
@@ -156,3 +156,31 @@ class TestTemplateVariables(unittest.TestCase):
         # When
         with self.assertRaises(InvalidVariable):
             _template_variables(variables)
+
+    def test_host_from_env_var(self):
+        # Given
+        config_dict = {
+            'host': {'env': 'ENV_VAR'},
+        }
+        expected = 'host.domain'
+
+        # When
+        with self.environment(ENV_VAR=expected):
+            config = Config.from_dict(config_dict)
+
+        # Then
+        self.assertEqual(config.host, expected)
+
+    def test_host_from_template(self):
+        # Given
+        config_dict = {
+            'host': {'template': '{var1}.domain'},
+            'vars': {'var1': 'host'},
+        }
+        expected = 'host.domain'
+
+        # When
+        config = Config.from_dict(config_dict)
+
+        # Then
+        self.assertEqual(config.host, expected)
