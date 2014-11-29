@@ -16,3 +16,75 @@ discovering Web API test cases descibed in YAML.
 
 
 .. _haas: https://github.com/sjagoe/haas
+
+**warning**: This plugin is not (yet) actually supported by
+haas_. Support will come by 30/11/2014.
+
+
+
+Example Test
+============
+
+.. code-block:: yaml
+
+    ---
+      version: '1.0'
+
+      config:
+        host:
+          env: TEST_HOSTNAME
+        vars:
+          api_root: "/api/v1/json"
+          metadata:
+            template: "{api_root}/metadata"
+
+      cases:
+        - name: "Basic"
+          tests:
+            - name: "Test root URL"
+              url: "/"
+              assertions:
+                - name: status_code
+                  expected: 200
+                - name: header
+                  header: Content-Type
+                  value: text/plain
+
+        - name: "A case"
+          tests:
+            - name: "Authentication failure"
+              method: GET
+              url:
+                template: "{metadata}/auth/required"
+              assertions:
+                - name: status_code
+                  expected: 401
+                - name: header
+                  header: WWW-Authenticate
+                  regexp: "Basic realm=.*"
+
+
+Current Features
+================
+
+* Describe web API tests using YAML.
+
+* Template URLs to avoid repeating items.
+
+* Variables and target hostname can be provided by environment variables.
+
+* YAML format contains multiple test cases.
+
+* Each test case is a grouping of related tests.
+
+* Make flexible assertions about the server's response.
+
+
+TODO
+====
+
+* Add more assertions.  Only assertions currently supported are:
+
+  * Status code
+
+  * Headers (string comparison or regexp match)
