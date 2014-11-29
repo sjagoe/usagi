@@ -17,10 +17,8 @@ discovering Web API test cases descibed in YAML.
 
 .. _haas: https://github.com/sjagoe/haas
 
-.. warning::
-
-    This plugin is not (yet) actually supported by haas_.  Support will
-    come by 30/11/2014.
+**warning**: This plugin is not (yet) actually supported by
+haas_. Support will come by 30/11/2014.
 
 
 
