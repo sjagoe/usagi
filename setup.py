@@ -106,12 +106,12 @@ if not is_released:
 
 if __name__ == "__main__":
     install_requires = [
-        'haas >= 0.6.0',
         'jsonschema',
         'pyyaml',
         'requests',
         'six',
         'stevedore',
+        'haas >= 0.6.0',
     ]
     if sys.version_info < (2, 7):
         install_requires += ['unittest2']
