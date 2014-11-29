@@ -149,6 +149,7 @@ if __name__ == "__main__":
         entry_points={
             'haas_rest_test.assertions': [
                 'status_code = haas_rest_test.plugins.assertions:StatusCodeAssertion',  # noqa
+                'header = haas_rest_test.plugins.assertions:HeaderAssertion',
             ],
         },
     )
