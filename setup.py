@@ -106,12 +106,12 @@ if not is_released:
 
 if __name__ == "__main__":
     install_requires = [
-        'haas >= 0.5.0',
         'jsonschema',
         'pyyaml',
         'requests',
         'six',
         'stevedore',
+        'haas >= 0.6.0',
     ]
     if sys.version_info < (2, 7):
         install_requires += ['unittest2']
@@ -147,6 +147,9 @@ if __name__ == "__main__":
         packages=['haas_rest_test'],
         install_requires=install_requires,
         entry_points={
+            'haas.discovery': [
+                'rest-test = haas_rest_test.discoverer:RestTestDiscoverer',
+            ],
             'haas_rest_test.assertions': [
                 'status_code = haas_rest_test.plugins.assertions:StatusCodeAssertion',  # noqa
                 'header = haas_rest_test.plugins.assertions:HeaderAssertion',

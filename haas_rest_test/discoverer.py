@@ -9,19 +9,52 @@ from __future__ import absolute_import, unicode_literals
 import logging
 import os
 
-from haas.discoverer import match_path
+from haas.plugins.discoverer import match_path
+from haas.plugins.i_discoverer_plugin import IDiscovererPlugin
 
 from .yaml_test_loader import YamlTestLoader
 
 logger = logging.getLogger(__name__)
 
 
-class RestTestDiscoverer(object):
+class RestTestDiscoverer(IDiscovererPlugin):
 
     def __init__(self, loader, **kwargs):
         super(RestTestDiscoverer, self).__init__(**kwargs)
         self._loader = loader
         self._yaml_loader = YamlTestLoader(loader)
+
+    @classmethod
+    def from_args(cls, args, arg_prefix, loader):
+        """Construct the discoverer from parsed command line arguments.
+
+        Parameters
+        ----------
+        args : argparse.Namespace
+            The ``argparse.Namespace`` containing parsed arguments.
+        arg_prefix : str
+            The prefix used for arguments beloning solely to this plugin.
+        loader : haas.loader.Loader
+            The test loader used to construct TestCase and TestSuite instances.
+
+        """
+        return cls(loader)
+
+    @classmethod
+    def add_parser_arguments(cls, parser, option_prefix, dest_prefix):
+        """Add options for the plugin to the main argument parser.
+
+        Parameters
+        ----------
+        parser : argparse.ArgumentParser
+            The parser to extend
+        option_prefix : str
+            The prefix that option strings added by this plugin should use.
+        dest_prefix : str
+            The prefix that ``dest`` strings for options added by this
+            plugin should use.
+
+        """
 
     def discover(self, start, top_level_directory=None, pattern=None):
         """Discover YAML-formatted Web API tests.

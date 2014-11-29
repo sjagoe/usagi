@@ -11,9 +11,8 @@ import shutil
 import tempfile
 import textwrap
 
-from haas.discoverer import find_test_cases
 from haas.loader import Loader
-from haas.suite import TestSuite
+from haas.suite import find_test_cases, TestSuite
 from haas.testing import unittest
 
 from ..discoverer import RestTestDiscoverer

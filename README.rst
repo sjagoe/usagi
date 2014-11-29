@@ -14,12 +14,10 @@ haas-rest-test: Web API test plugin for haas
 ``haas-rest-test`` is a plugin for haas_ that adds support for
 discovering Web API test cases descibed in YAML.
 
+``haas-rest-test`` requires ``haas v0.6.0`` or later.
+
 
 .. _haas: https://github.com/sjagoe/haas
-
-**warning**: This plugin is not (yet) actually supported by
-haas_. Support will come by 30/11/2014.
-
 
 
 Example Test
