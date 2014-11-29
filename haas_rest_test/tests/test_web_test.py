@@ -171,3 +171,58 @@ class TestWebTest(unittest.TestCase):
 
         # Then
         self.assertTrue(case.fail.called)
+
+    def test_templating_url(self):
+        # Given
+        config = Config.from_dict({
+            'host': 'test.invalid',
+            'vars': {'prefix': '/api'},
+        })
+        session = create_session()
+        name = 'A test'
+        url = {'template': '{prefix}/test'}
+        test_spec = {
+            'name': name,
+            'url': url,
+        }
+        expected_url = urllib.parse.urlunparse(
+            urllib.parse.ParseResult(
+                config.scheme,
+                config.host,
+                '/api/test',
+                None,
+                None,
+                None,
+            ),
+        )
+
+        # When
+        test = WebTest.from_dict(session, test_spec, config, {})
+
+        # Then
+        self.assertEqual(test.url, expected_url)
+
+    def test_invalid_url(self):
+        # Given
+        config = Config.from_dict({
+            'host': 'test.invalid',
+            'vars': {'prefix': '/api'},
+        })
+        session = create_session()
+        name = 'A test'
+        url = {'something': '{prefix}/test'}
+        test_spec = {
+            'name': name,
+            'url': url,
+        }
+        test = WebTest.from_dict(session, test_spec, config, {})
+        case = Mock()
+        case.fail.side_effect = AssertionError
+
+        # When
+        with self.assertRaises(AssertionError):
+            test.run(case)
+
+        # Then
+        case.fail.assert_called_once_with(
+            'InvalidVariable("{\'something\': \'{prefix}/test\'}",)')

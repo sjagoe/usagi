@@ -9,7 +9,7 @@ from __future__ import absolute_import, unicode_literals
 from requests.exceptions import ConnectionError
 from six.moves import urllib
 
-from .exceptions import InvalidAssertionClass
+from .exceptions import InvalidAssertionClass, InvalidVariable
 
 
 def initialize_assertions(assertion_map, assertion_specs):
@@ -38,7 +38,7 @@ class WebTest(object):
             urllib.parse.ParseResult(
                 self.config.scheme,
                 self.config.host,
-                self.path,
+                self.config.fill_template(self.path),
                 None,
                 None,
                 None,
@@ -61,9 +61,11 @@ class WebTest(object):
 
     def run(self, case):
         try:
-            response = self.session.request(
-                self.method, self.url,
-            )
+            url = self.url
+        except InvalidVariable as exc:
+            case.fail(repr(exc))
+        try:
+            response = self.session.request(self.method, url)
         except ConnectionError as exc:
             case.fail('Unable to connect: {0!r}'.format(str(exc)))
         for assertion in self.assertions:
