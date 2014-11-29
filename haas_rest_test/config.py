@@ -80,7 +80,7 @@ def _template_variables(variables):
                 templates[name] = {TEMPLATE: new_value}
         if template_keys == set(templates.keys()):
             raise VariableLoopError(
-                'Loop detected in template vars: {!r}'.format(template_keys))
+                'Loop detected in template vars: {0!r}'.format(template_keys))
 
     return templated
 
