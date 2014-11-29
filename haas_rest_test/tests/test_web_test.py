@@ -23,7 +23,7 @@ class TestWebTest(unittest.TestCase):
 
     def test_from_dict(self):
         # Given
-        config = Config('http', 'test.invalid')
+        config = Config.from_dict({'host': 'test.invalid'})
         session = create_session()
         name = 'A test'
         url = '/api/test'
@@ -55,7 +55,7 @@ class TestWebTest(unittest.TestCase):
 
     def test_create_with_assertions(self):
         # Given
-        config = Config('http', 'test.invalid')
+        config = Config.from_dict({'host': 'test.invalid'})
         session = create_session()
         name = 'A test'
         url = '/api/test'
@@ -83,7 +83,7 @@ class TestWebTest(unittest.TestCase):
 
     def test_create_invlalid_assertions(self):
         # Given
-        config = Config('http', 'test.invalid')
+        config = Config.from_dict({'host': 'test.invalid'})
         session = create_session()
         name = 'A test'
         url = '/api/test'
@@ -107,7 +107,7 @@ class TestWebTest(unittest.TestCase):
     @responses.activate
     def test_run(self):
         # Given
-        config = Config('http', 'test.invalid')
+        config = Config.from_dict({'host': 'test.invalid'})
         session = create_session()
         name = 'A test'
         url = '/api/test'
@@ -143,7 +143,7 @@ class TestWebTest(unittest.TestCase):
     # @responses.activate
     def test_connection_error(self):
         # Given
-        config = Config('http', 'test.invalid')
+        config = Config.from_dict({'host': 'test.invalid'})
         session = create_session()
         name = 'A test'
         url = '/api/test'
