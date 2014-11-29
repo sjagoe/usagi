@@ -2,7 +2,7 @@
 haas-rest-test: Web API test plugin for haas
 ============================================
 
-.. image:: https://api.travis-ci.org/sjagoe/haas.png-rest-test?branch=master
+.. image:: https://api.travis-ci.org/sjagoe/haas-rest-test.png?branch=master
    :target: https://travis-ci.org/sjagoe/haas-rest-test
    :alt: Build status
 
