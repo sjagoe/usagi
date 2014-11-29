@@ -8,3 +8,11 @@ class YamlParseError(HaasRestTestError):
 
 class InvalidAssertionClass(HaasRestTestError):
     pass
+
+
+class InvalidVariable(HaasRestTestError):
+    pass
+
+
+class VariableLoopError(HaasRestTestError):
+    pass

@@ -27,7 +27,7 @@ class TestSchema(unittest.TestCase):
 
           config:
             host: test.domain
-            variables:
+            vars:
               api: "/api/v0/json"
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
@@ -62,7 +62,7 @@ class TestSchema(unittest.TestCase):
 
           config:
             host: test.domain
-            variables:
+            vars:
               api: "/api/v0/json"
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
@@ -101,7 +101,7 @@ class TestSchema(unittest.TestCase):
 
           config:
             host: test.domain
-            variables:
+            vars:
               api: "/api/v0/json"
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
@@ -151,7 +151,7 @@ class TestSchema(unittest.TestCase):
 
           config:
             host: test.domain
-            variables:
+            vars:
               api: "/api/v0/json"
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
@@ -172,7 +172,7 @@ class TestSchema(unittest.TestCase):
 
           config:
             host: test.domain
-            variables:
+            vars:
               api: "/api/v0/json"
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
@@ -201,7 +201,7 @@ class TestSchema(unittest.TestCase):
 
           config:
             host: test.domain
-            variables:
+            vars:
               api: "/api/v0/json"
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
@@ -225,7 +225,7 @@ class TestSchema(unittest.TestCase):
           version: '1.0'
 
           config:
-            variables:
+            vars:
               api: "/api/v0/json"
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"
@@ -252,7 +252,7 @@ class TestSchema(unittest.TestCase):
 
           config:
             host: true
-            variables:
+            vars:
               api: "/api/v0/json"
               data: "/api/v0/json/data"
               upload: "/api/v0/json/upload"

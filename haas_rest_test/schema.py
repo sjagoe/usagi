@@ -19,13 +19,17 @@ SCHEMA = {
             'type': 'object',
             'description': 'Configuration applied to all generated test cases',
             'properties': {
-                'variables': {'type': 'object'},
+                'vars': {'type': 'object'},
                 'scheme': {
                     'enum': ['http', 'https'],
                     'default': 'http',
                 },
                 'host': {
-                    'type': 'string',
+                    'oneOf': [
+                        {'$ref': '#/definitions/env_var'},
+                        {'$ref': '#/definitions/simple_var'},
+                        {'$ref': '#/definitions/template_var'},
+                    ],
                 },
             },
             'required': ['host'],
@@ -41,15 +45,25 @@ SCHEMA = {
             'description': 'The name of the object',
             'type': 'string',
         },
-        'url_template': {
+        'env_var': {
+            'type': 'object',
+            'properties': {
+                'env': {
+                    'type': 'string',
+                },
+            },
+            'required': ['env'],
+        },
+        'template_var': {
             'type': 'object',
             'properties': {
                 'template': {
                     'type': 'string',
                 },
             },
+            'required': ['template'],
         },
-        'url': {
+        'simple_var': {
             'type': 'string',
         },
         'case': {
@@ -78,8 +92,8 @@ SCHEMA = {
                 },
                 'url': {
                     'oneOf': [
-                        {'$ref': '#/definitions/url'},
-                        {'$ref': '#/definitions/url_template'},
+                        {'$ref': '#/definitions/simple_var'},
+                        {'$ref': '#/definitions/template_var'},
                     ],
                 },
                 'name': {
