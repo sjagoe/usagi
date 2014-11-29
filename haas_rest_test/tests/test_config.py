@@ -12,6 +12,7 @@ import os
 from haas.testing import unittest
 
 from ..config import _template_variables
+from ..exceptions import InvalidVariable, VariableLoopError
 
 
 class TestTemplateVariables(unittest.TestCase):
@@ -70,7 +71,7 @@ class TestTemplateVariables(unittest.TestCase):
         expected = {
             'var1': '/some/path',
             'var2': '/another/path',
-            'var3': '/another/path/yet/another/path'
+            'var3': '/another/path/yet/another/path',
         }
 
         # When
@@ -83,13 +84,15 @@ class TestTemplateVariables(unittest.TestCase):
         # Given
         variables = {
             'var1': '/some/path',
-            'var2': {'template': '{var1}/another/path'},
+            'var2': {'template': '{var4}/another/path'},
             'var3': {'template': '{var2}/yet/another/path'},
+            'var4': {'template': '{var1}/again'},
         }
         expected = {
             'var1': '/some/path',
-            'var2': '/some/path/another/path',
-            'var3': '/some/path/another/path/yet/another/path'
+            'var2': '/some/path/again/another/path',
+            'var3': '/some/path/again/another/path/yet/another/path',
+            'var4': '/some/path/again',
         }
 
         # When
@@ -141,5 +144,15 @@ class TestTemplateVariables(unittest.TestCase):
         }
 
         # When
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(VariableLoopError):
+            _template_variables(variables)
+
+    def test_invalid_type(self):
+        # Given
+        variables = {
+            'var1': {'bad_type': '{var2}/another/path'},
+        }
+
+        # When
+        with self.assertRaises(InvalidVariable):
             _template_variables(variables)

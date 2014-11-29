@@ -10,6 +10,8 @@ import os
 
 from six import string_types
 
+from .exceptions import InvalidVariable, VariableLoopError
+
 
 VAR = 'var'
 ENV = 'env'
@@ -21,7 +23,7 @@ def _dict_to_var(var_dict):
         return TEMPLATE, var_dict[TEMPLATE]
     elif ENV in var_dict:
         return ENV, var_dict[ENV]
-    raise RuntimeError('Unknown var type {!r}'.format(var_dict))
+    raise InvalidVariable(repr(var_dict))
 
 
 def _resolve_simple_var(value):
@@ -47,21 +49,17 @@ def _resolve_simple_vars(variables):
 
 def _fill_template(name, value, template_vars):
     type_, value = _dict_to_var(value)
-    if type_ == TEMPLATE:
-        try:
-            new_value = value.format(**template_vars)
-        except KeyError:  # We don't have all dependencies resolved yet
-            return TEMPLATE, name, value
-        else:
-            try:
-                new_value.format()
-            except KeyError:  # We don't have all dependencies resolved yet
-                return TEMPLATE, name, new_value
-            else:
-                return VAR, name, new_value
+    try:
+        new_value = value.format(**template_vars)
+    except KeyError:  # We don't have all dependencies resolved yet
+        return TEMPLATE, name, value
     else:
-        raise RuntimeError('Can\'t handle var {!r} of type: {!r}'.format(
-            name, type_))
+        try:
+            new_value.format()
+        except KeyError:  # We don't have all dependencies resolved yet
+            return TEMPLATE, name, new_value
+        else:
+            return VAR, name, new_value
 
 
 def _template_variables(variables):
@@ -81,7 +79,8 @@ def _template_variables(variables):
             elif type_ == TEMPLATE:
                 templates[name] = {TEMPLATE: new_value}
         if template_keys == set(templates.keys()):
-            raise RuntimeError('Loop detected in template vars')
+            raise VariableLoopError(
+                'Loop detected in template vars: {!r}'.format(template_keys))
 
     return templated
 
@@ -101,3 +100,10 @@ class Config(object):
             host=config['host'],
             variables=_template_variables(config.get('vars')),
         )
+
+    def fill_template(self, template):
+        type_, value = _resolve_simple_var(template)
+        if type_ == VAR:
+            return value
+        elif type_ == TEMPLATE:
+            return value.format(**self.variables)
