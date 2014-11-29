@@ -11,11 +11,10 @@ import textwrap
 import responses
 import yaml
 
-from haas.discoverer import find_test_cases
 from haas.loader import Loader
 from haas.module_import_error import ModuleImportError
 from haas.result import ResultCollecter
-from haas.suite import TestSuite
+from haas.suite import find_test_cases, TestSuite
 from haas.testing import unittest
 
 from ..exceptions import YamlParseError

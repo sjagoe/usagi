@@ -9,7 +9,7 @@ from __future__ import absolute_import, unicode_literals
 import logging
 import os
 
-from haas.discoverer import match_path
+from haas.plugins.discoverer import match_path
 
 from .yaml_test_loader import YamlTestLoader
 
