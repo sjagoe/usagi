@@ -106,7 +106,7 @@ if not is_released:
 
 if __name__ == "__main__":
     install_requires = [
-        'haas >= 0.5.0',
+        'haas >= 0.6.0',
         'jsonschema',
         'pyyaml',
         'requests',
