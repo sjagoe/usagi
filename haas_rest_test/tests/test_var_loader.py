@@ -283,3 +283,31 @@ class TestVarLoader(unittest.TestCase):
         # When/Then
         with self.assertRaises(InvalidVariableType):
             loader.load_variables(var_dict)
+
+    def test_load_variable(self):
+        # Given
+        variables = {
+            'var1': 'foo',
+            'var2': 'bar',
+        }
+        loader = VarLoader(__file__)
+        to_load = {'type': 'template', 'template': '/{var1}/{var2}'}
+        expected = '/foo/bar'
+
+        # When
+        value = loader.load_variable('name', to_load, variables)
+
+        # Then
+        self.assertEqual(value, expected)
+
+    def test_load_variable_missing_template(self):
+        # Given
+        variables = {
+            'var1': 'foo',
+        }
+        loader = VarLoader(__file__)
+        to_load = {'type': 'template', 'template': '/{var1}/{var2}'}
+
+        # When/Then
+        with self.assertRaises(InvalidVariable):
+            loader.load_variable('name', to_load, variables)

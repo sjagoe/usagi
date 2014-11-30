@@ -165,6 +165,12 @@ class VarLoader(object):
             loaders.append(self._create_loader(name, var))
         return loaders
 
+    def load_variable(self, name, var, existing_variables):
+        loader = self._create_loader(name, var)
+        if not loader.load(existing_variables):
+            raise InvalidVariable(name, repr(var))
+        return loader.value
+
     def load_variables(self, var_dict):
         variables = {}
         loaders = self._create_loaders(var_dict)
