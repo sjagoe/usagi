@@ -272,3 +272,14 @@ class TestVarLoader(unittest.TestCase):
         # When/Then
         with self.assertRaises(InvalidVariable):
             loader.load_variables(var_dict)
+
+    def test_missing_variable_type(self):
+        # Given
+        var_dict = {
+            'unknown': {},
+        }
+        loader = VarLoader(__file__)
+
+        # When/Then
+        with self.assertRaises(InvalidVariableType):
+            loader.load_variables(var_dict)

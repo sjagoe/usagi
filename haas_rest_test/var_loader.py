@@ -144,7 +144,11 @@ class VarLoader(object):
         if isinstance(var, string_types):
             loader = StringVarLoader(name, var)
         elif isinstance(var, dict):
-            loader_type = var['type']
+            try:
+                loader_type = var['type']
+            except KeyError:
+                raise InvalidVariableType(
+                    'Missing type for var {0!r}'.format(name))
             if loader_type not in self.loaders:
                 raise InvalidVariableType(
                     'Invalid type for var {0!r}: {1!r}'.format(
