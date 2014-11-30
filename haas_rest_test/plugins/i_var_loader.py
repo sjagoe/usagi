@@ -31,12 +31,14 @@ class IVarLoader(object):
         """
 
     @abc.abstractmethod
-    def load(self, variables):
+    def load(self, filename, variables):
         """Load the var, making use of already-loaded vars in the dict
         ``variables``.
 
         Parameters
         ----------
+        filename : str
+            The path of the file from which this var is loaded.
         variables : dict
             Mapping of var names to their loaded values.
 

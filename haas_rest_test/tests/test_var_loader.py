@@ -21,7 +21,7 @@ class TestStringVarLoader(unittest.TestCase):
         loader = StringVarLoader('name', 'value')
 
         # Then
-        self.assertTrue(loader.load(None))
+        self.assertTrue(loader.load(__file__, None))
         self.assertEqual(loader.name, 'name')
         self.assertEqual(loader.value, 'value')
 

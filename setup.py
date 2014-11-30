@@ -156,6 +156,7 @@ if __name__ == "__main__":
             ],
             'haas_rest_test.var_loaders': [
                 'env = haas_rest_test.plugins.var_loaders:EnvVarLoader',
+                'file = haas_rest_test.plugins.var_loaders:FileVarLoader',
                 'template = haas_rest_test.plugins.var_loaders:TemplateVarLoader',  # noqa
             ],
         },

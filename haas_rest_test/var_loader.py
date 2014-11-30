@@ -19,7 +19,7 @@ class StringVarLoader(object):
         self.name = name
         self.value = value
 
-    def load(self, variables):
+    def load(self, filename, variables):
         return True
 
 
@@ -64,7 +64,7 @@ class VarLoader(object):
 
     def load_variable(self, name, var, existing_variables):
         loader = self._create_loader(name, var)
-        if not loader.load(existing_variables):
+        if not loader.load(self.filename, existing_variables):
             raise InvalidVariable(name, repr(var))
         return loader.value
 
@@ -73,7 +73,7 @@ class VarLoader(object):
         loaders = self._create_loaders(var_dict)
         while len(loaders) > 0:
             loaded = set(loader for loader in loaders
-                         if loader.load(variables))
+                         if loader.load(self.filename, variables))
             if len(loaded) == 0:
                 raise VariableLoopError()
             new_vars = ((loader.name, loader.value) for loader in loaded)
