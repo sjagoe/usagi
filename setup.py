@@ -154,5 +154,9 @@ if __name__ == "__main__":
                 'status_code = haas_rest_test.plugins.assertions:StatusCodeAssertion',  # noqa
                 'header = haas_rest_test.plugins.assertions:HeaderAssertion',
             ],
+            'haas_rest_test.var_loaders': [
+                'env = haas_rest_test.plugins.var_loaders:EnvVarLoader',
+                'template = haas_rest_test.plugins.var_loaders:TemplateVarLoader',  # noqa
+            ],
         },
     )

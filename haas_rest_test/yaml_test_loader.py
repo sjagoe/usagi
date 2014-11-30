@@ -9,9 +9,9 @@ from __future__ import absolute_import, unicode_literals
 import logging
 
 from jsonschema.exceptions import ValidationError
+from stevedore.extension import ExtensionManager
 import jsonschema
 import six
-from stevedore.extension import ExtensionManager
 import yaml
 
 from haas.module_import_error import ModuleImportError
