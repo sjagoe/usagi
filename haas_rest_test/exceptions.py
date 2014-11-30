@@ -14,5 +14,9 @@ class InvalidVariable(HaasRestTestError):
     pass
 
 
+class InvalidVariableType(HaasRestTestError):
+    pass
+
+
 class VariableLoopError(HaasRestTestError):
     pass

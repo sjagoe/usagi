@@ -10,7 +10,7 @@ import os
 
 from six import string_types
 
-from .exceptions import InvalidVariable, VariableLoopError
+from .exceptions import InvalidVariable, InvalidVariableType, VariableLoopError
 
 
 class StringVarLoader(object):
@@ -84,3 +84,49 @@ class TemplateVarLoader(object):
     @property
     def value(self):
         return self._value
+
+
+class VarLoader(object):
+
+    def __init__(self, filename):
+        super(VarLoader, self).__init__()
+        self.filename = filename
+        self.loaders = {
+            'env': EnvVarLoader,
+            'template': TemplateVarLoader,
+        }
+        self.loader_keys = set(self.loaders.keys())
+
+    def _create_loader(self, name, var):
+        if isinstance(var, string_types):
+            loader = StringVarLoader(name, var)
+        elif isinstance(var, dict):
+            loader_type = var['type']
+            if loader_type not in self.loaders:
+                raise InvalidVariableType(
+                    'Invalid type for var {0!r}: {1!r}'.format(
+                        name, loader_type))
+            cls = self.loaders[loader_type]
+            loader = cls.from_dict(name, var)
+        else:
+            raise InvalidVariable(var)
+        return loader
+
+    def _create_loaders(self, var_dict):
+        loaders = []
+        for name, var in var_dict.items():
+            loaders.append(self._create_loader(name, var))
+        return loaders
+
+    def load_variables(self, var_dict):
+        variables = {}
+        loaders = self._create_loaders(var_dict)
+        while len(loaders) > 0:
+            loaded = set(loader for loader in loaders
+                         if loader.load(variables))
+            if len(loaded) == 0:
+                raise VariableLoopError()
+            new_vars = ((loader.name, loader.value) for loader in loaded)
+            variables.update(new_vars)
+            loaders = [loader for loader in loaders if loader not in loaded]
+        return variables
