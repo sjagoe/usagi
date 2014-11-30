@@ -45,9 +45,10 @@ class EnvVarLoader(object):
         'required': ['type', 'env']
     }
 
-    def __init__(self, name, env_var):
+    def __init__(self, name, env_var, raw):
         super(EnvVarLoader, self).__init__()
         self.name = name
+        self._raw = raw
         self._env_var = env_var
         self._value = None
         self._is_loaded = False
@@ -58,14 +59,18 @@ class EnvVarLoader(object):
             jsonschema.validate(var_dict, cls._schema)
         except ValidationError as e:
             raise YamlParseError(str(e))
-        return cls(name=name, env_var=var_dict['env'])
+        return cls(
+            name=name,
+            env_var=var_dict['env'],
+            raw=var_dict,
+        )
 
     def load(self, variables):
         if not self._is_loaded:
             try:
                 self._value = os.environ[self._env_var]
             except KeyError:
-                raise InvalidVariable('FIXME')
+                raise InvalidVariable(self.name, repr(self._raw))
             else:
                 self._is_loaded = True
         return self._is_loaded
@@ -156,7 +161,7 @@ class VarLoader(object):
             cls = self.loaders[loader_type]
             loader = cls.from_dict(name, var)
         else:
-            raise InvalidVariable(var)
+            raise InvalidVariable(name, repr(var))
         return loader
 
     def _create_loaders(self, var_dict):
