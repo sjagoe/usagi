@@ -30,10 +30,12 @@ Example Test
 
       config:
         host:
+          type: env
           env: TEST_HOSTNAME
         vars:
           api_root: "/api/v1/json"
           metadata:
+            type: template
             template: "{api_root}/metadata"
 
       cases:
@@ -53,6 +55,7 @@ Example Test
             - name: "Authentication failure"
               method: GET
               url:
+                type: template
                 template: "{metadata}/auth/required"
               assertions:
                 - name: status_code

@@ -54,6 +54,23 @@ SCHEMA = {
             },
             'required': ['env'],
         },
+        'file_var': {
+            'type': 'object',
+            'properties': {
+                'file': {
+                    'type': 'string',
+                    'description': 'Filename relative to the current YAML file.',  # noqa
+                },
+                'format': {
+                    'enum': ['plain', 'json'],
+                    'default': 'plain',
+                },
+            },
+            'required': ['name'],
+        },
+        'simple_var': {
+            'type': 'string',
+        },
         'template_var': {
             'type': 'object',
             'properties': {
@@ -62,9 +79,6 @@ SCHEMA = {
                 },
             },
             'required': ['template'],
-        },
-        'simple_var': {
-            'type': 'string',
         },
         'case': {
             'type': 'object',
