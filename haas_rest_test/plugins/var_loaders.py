@@ -200,10 +200,6 @@ class FileVarLoader(IVarLoader):
                 value = data
             elif format == 'json':
                 value = json.loads(data)
-            else:
-                raise InvalidVariable(
-                    'Unknown file format for file {0!r}: {1!r}'.format(
-                        file_path, format))
             self._value = value
             self._is_loaded = True
         return self._is_loaded
