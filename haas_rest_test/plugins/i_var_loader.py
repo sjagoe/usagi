@@ -37,6 +37,8 @@ class IVarLoader(object):
 
         Parameters
         ----------
+        filename : str
+            The path of the file from which this var is loaded.
         variables : dict
             Mapping of var names to their loaded values.
 
