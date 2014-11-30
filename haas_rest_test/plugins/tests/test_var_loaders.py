@@ -56,7 +56,7 @@ class TestEnvVarLoader(unittest.TestCase):
 
         # When
         with environment(ENV_VAR=value):
-            is_loaded = loader.load(None)
+            is_loaded = loader.load(__file__, None)
 
         # Then
         self.assertTrue(is_loaded)
@@ -74,7 +74,7 @@ class TestEnvVarLoader(unittest.TestCase):
 
         # When/Then
         with self.assertRaises(InvalidVariable):
-            loader.load(None)
+            loader.load(__file__, None)
 
 
 class TestTemplateVarLoader(unittest.TestCase):
@@ -119,7 +119,7 @@ class TestTemplateVarLoader(unittest.TestCase):
         loader = TemplateVarLoader.from_dict(name, var_dict)
 
         # When
-        is_loaded = loader.load({})
+        is_loaded = loader.load(__file__, {})
 
         # Then
         self.assertTrue(is_loaded)
@@ -136,7 +136,7 @@ class TestTemplateVarLoader(unittest.TestCase):
         loader = TemplateVarLoader.from_dict(name, var_dict)
 
         # When
-        is_loaded = loader.load({})
+        is_loaded = loader.load(__file__, {})
 
         # Then
         self.assertFalse(is_loaded)
@@ -154,7 +154,7 @@ class TestTemplateVarLoader(unittest.TestCase):
         loader = TemplateVarLoader.from_dict(name, var_dict)
 
         # When
-        is_loaded = loader.load({'temp': '/some'})
+        is_loaded = loader.load(__file__, {'temp': '/some'})
 
         # Then
         self.assertTrue(is_loaded)
@@ -172,7 +172,7 @@ class TestTemplateVarLoader(unittest.TestCase):
         loader = TemplateVarLoader.from_dict(name, var_dict)
 
         # When
-        is_loaded = loader.load({'temp': '{prefix}/other'})
+        is_loaded = loader.load(__file__, {'temp': '{prefix}/other'})
 
         # Then
         self.assertFalse(is_loaded)
@@ -181,7 +181,7 @@ class TestTemplateVarLoader(unittest.TestCase):
         self.assertEqual(loader.value, None)
 
         # When
-        is_loaded = loader.load({'prefix': '/some'})
+        is_loaded = loader.load(__file__, {'prefix': '/some'})
 
         # Then
         self.assertTrue(is_loaded)

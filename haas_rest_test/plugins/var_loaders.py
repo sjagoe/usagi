@@ -53,7 +53,7 @@ class EnvVarLoader(IVarLoader):
             raw=var_dict,
         )
 
-    def load(self, variables):
+    def load(self, filename, variables):
         if not self._is_loaded:
             try:
                 self._value = os.environ[self._env_var]
@@ -101,7 +101,7 @@ class TemplateVarLoader(IVarLoader):
             raise YamlParseError(str(e))
         return cls(name=name, template=var_dict['template'])
 
-    def load(self, variables):
+    def load(self, filename, variables):
         if not self._is_loaded:
             try:
                 value = self._template.format(**variables)
