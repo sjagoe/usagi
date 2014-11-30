@@ -6,27 +6,13 @@
 # of the 3-clause BSD license.  See the LICENSE.txt file for details.
 from __future__ import absolute_import, unicode_literals
 
-from contextlib import contextmanager
-import os
-
 from haas.testing import unittest
 
+from .utils import environment
 from ..exceptions import (
     InvalidVariable, InvalidVariableType, VariableLoopError, YamlParseError)
 from ..var_loader import (
     StringVarLoader, EnvVarLoader, TemplateVarLoader, VarLoader)
-
-
-@contextmanager
-def environment(**env):
-    old_env = os.environ
-    new_env = os.environ.copy()
-    new_env.update(env)
-    os.environ = new_env
-    try:
-        yield
-    finally:
-        os.environ = old_env
 
 
 class TestStringVarLoader(unittest.TestCase):
