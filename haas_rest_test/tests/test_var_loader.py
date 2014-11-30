@@ -12,7 +12,7 @@ import os
 from haas.testing import unittest
 
 from ..exceptions import (
-    InvalidVariable, InvalidVariableType, VariableLoopError)
+    InvalidVariable, InvalidVariableType, VariableLoopError, YamlParseError)
 from ..var_loader import (
     StringVarLoader, EnvVarLoader, TemplateVarLoader, VarLoader)
 
@@ -42,6 +42,35 @@ class TestStringVarLoader(unittest.TestCase):
 
 
 class TestEnvVarLoader(unittest.TestCase):
+
+    def test_validation_failure(self):
+        name = 'env_var'
+        var_dict = {
+            'type': 'foo',
+            'env': 'VAR',
+        }
+
+        # When/Then
+        with self.assertRaises(YamlParseError):
+            EnvVarLoader.from_dict(name, var_dict)
+
+        name = 'env_var'
+        var_dict = {
+            'type': 'env',
+        }
+
+        # When/Then
+        with self.assertRaises(YamlParseError):
+            EnvVarLoader.from_dict(name, var_dict)
+
+        # Given
+        var_dict = {
+            'env': 'VAR',
+        }
+
+        # When/Then
+        with self.assertRaises(YamlParseError):
+            EnvVarLoader.from_dict(name, var_dict)
 
     def test_env_var_loader_basic(self):
         # Given
@@ -77,6 +106,35 @@ class TestEnvVarLoader(unittest.TestCase):
 
 
 class TestTemplateVarLoader(unittest.TestCase):
+
+    def test_validation_failure(self):
+        name = 'template_var'
+        var_dict = {
+            'type': 'foo',
+            'template': 'VAR',
+        }
+
+        # When/Then
+        with self.assertRaises(YamlParseError):
+            TemplateVarLoader.from_dict(name, var_dict)
+
+        name = 'template_var'
+        var_dict = {
+            'type': 'template',
+        }
+
+        # When/Then
+        with self.assertRaises(YamlParseError):
+            TemplateVarLoader.from_dict(name, var_dict)
+
+        # Given
+        var_dict = {
+            'template': '{foo}',
+        }
+
+        # When/Then
+        with self.assertRaises(YamlParseError):
+            TemplateVarLoader.from_dict(name, var_dict)
 
     def test_template_no_substitutions(self):
         # Given

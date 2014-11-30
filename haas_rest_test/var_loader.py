@@ -9,8 +9,11 @@ from __future__ import absolute_import, unicode_literals
 import os
 
 from six import string_types
+from jsonschema.exceptions import ValidationError
+import jsonschema
 
-from .exceptions import InvalidVariable, InvalidVariableType, VariableLoopError
+from .exceptions import (
+    InvalidVariable, InvalidVariableType, VariableLoopError, YamlParseError)
 
 
 class StringVarLoader(object):
@@ -26,6 +29,22 @@ class StringVarLoader(object):
 
 class EnvVarLoader(object):
 
+    _schema = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'Create a var from environment variable',
+        'description': 'Var markup for Haas Rest Test',
+        'type': 'object',
+        'properties': {
+            'type': {
+                'enum': ['env'],
+            },
+            'env': {
+                'type': 'string',
+            },
+        },
+        'required': ['type', 'env']
+    }
+
     def __init__(self, name, env_var):
         super(EnvVarLoader, self).__init__()
         self.name = name
@@ -35,6 +54,10 @@ class EnvVarLoader(object):
 
     @classmethod
     def from_dict(cls, name, var_dict):
+        try:
+            jsonschema.validate(var_dict, cls._schema)
+        except ValidationError as e:
+            raise YamlParseError(str(e))
         return cls(name=name, env_var=var_dict['env'])
 
     def load(self, variables):
@@ -54,6 +77,22 @@ class EnvVarLoader(object):
 
 class TemplateVarLoader(object):
 
+    _schema = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'Create a var from string template variable',
+        'description': 'Var markup for Haas Rest Test',
+        'type': 'object',
+        'properties': {
+            'type': {
+                'enum': ['template'],
+            },
+            'template': {
+                'type': 'string',
+            },
+        },
+        'required': ['type', 'template']
+    }
+
     def __init__(self, name, template):
         super(TemplateVarLoader, self).__init__()
         self.name = name
@@ -63,6 +102,10 @@ class TemplateVarLoader(object):
 
     @classmethod
     def from_dict(cls, name, var_dict):
+        try:
+            jsonschema.validate(var_dict, cls._schema)
+        except ValidationError as e:
+            raise YamlParseError(str(e))
         return cls(name=name, template=var_dict['template'])
 
     def load(self, variables):
