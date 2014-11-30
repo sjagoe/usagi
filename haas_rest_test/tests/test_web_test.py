@@ -183,7 +183,10 @@ class TestWebTest(unittest.TestCase):
         )
         session = create_session()
         name = 'A test'
-        url = {'template': '{prefix}/test'}
+        url = {
+            'type': 'template',
+            'template': '{prefix}/test',
+        }
         test_spec = {
             'name': name,
             'url': url,
@@ -234,5 +237,5 @@ class TestWebTest(unittest.TestCase):
         args, kwargs = case.fail.call_args
         self.assertRegexpMatches(
             args[0],
-            r"""InvalidVariable\("\{u?'something': u?'\{prefix\}/test'\}",\)"""
+            """InvalidVariableType\(u?['"]Missing type.*"""
         )
