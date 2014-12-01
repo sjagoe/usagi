@@ -41,8 +41,10 @@ class StatusCodeAssertion(object):
             raise YamlParseError(str(e))
         return cls(expected_status=data['expected'])
 
-    def run(self, case, response):
-        case.assertEqual(response.status_code, self.expected_status)
+    def run(self, url, case, response):
+        msg = '{0!r}: Status {1!r} != {2!r}'.format(
+            url, response.status_code, self.expected_status)
+        case.assertEqual(response.status_code, self.expected_status, msg=msg)
 
 
 class HeaderAssertion(object):
@@ -90,13 +92,18 @@ class HeaderAssertion(object):
             regexp = True
         return cls(header, value, regexp)
 
-    def run(self, case, response):
+    def run(self, url, case, response):
         headers = response.headers
-        case.assertIn(self.header, headers)
+        msg = '{0!r}: Header not found: {1!r}'.format(url, self.header)
+        case.assertIn(self.header, headers, msg=msg)
         header = headers[self.header]
         if self.expected_value is None:
             return
         if self.regexp:
-            case.assertRegexpMatches(self.expected_value, header)
+            msg = '{0!r}: Header {1!r} does not match regexp: {!2}'.format(
+                url, self.header, self.expected_value)
+            case.assertRegexpMatches(self.expected_value, header, msg=msg)
         else:
-            case.assertEqual(header, self.expected_value)
+            msg = '{0!r}: Header {1!r} does not match expected: {!2}'.format(
+                url, self.header, self.expected_value)
+            case.assertEqual(header, self.expected_value, msg=msg)
