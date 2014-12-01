@@ -144,7 +144,7 @@ if __name__ == "__main__":
         description='Web API testing for haas',
         long_description=long_description,
         license='BSD',
-        packages=['haas_rest_test'],
+        packages=['haas_rest_test', 'haas_rest_test.plugins'],
         install_requires=install_requires,
         entry_points={
             'haas.discovery': [
