@@ -107,3 +107,44 @@ class HeaderAssertion(object):
             msg = '{0!r}: Header {1!r} does not match expected: {2!r}'.format(
                 url, self.header, self.expected_value)
             case.assertEqual(header, self.expected_value, msg=msg)
+
+
+class BodyAssertion(object):
+
+    _schema = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'Assertion on status code',
+        'description': 'Test case markup for Haas Rest Test',
+        'type': 'object',
+        'properties': {
+            'format': {
+                'enum': ['plain', 'json'],
+                'default': 'plain',
+            },
+            'value': {
+                'description': 'The value with which to compare the body',
+            },
+        },
+        'required': ['value']
+    }
+
+    def __init__(self, format, value):
+        super(BodyAssertion, self).__init__()
+        self.format = format
+        self.value = value
+
+    @classmethod
+    def from_dict(cls, data):
+        try:
+            jsonschema.validate(data, cls._schema)
+        except ValidationError as e:
+            raise YamlParseError(str(e))
+        return cls(format=data.get('format', 'plain'), value=data['value'])
+
+    def run(self, url, case, response):
+        if self.format == 'json':
+            body = response.json()
+        else:
+            body = response.body
+        msg = '{0!r}: Body does not match expected value'.format(url)
+        case.assertEqual(body, self.value, msg=msg)
