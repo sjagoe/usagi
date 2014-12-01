@@ -138,7 +138,11 @@ class TestWebTest(unittest.TestCase):
         test.run(case)
 
         # Then
-        case.assertEqual.assert_called_once_with(204, 200)
+        self.assertEqual(case.assertEqual.call_count, 1)
+        call = case.assertEqual.call_args
+        args, kwargs = call
+        self.assertEqual(args, (204, 200))
+        self.assertIn('msg', kwargs)
 
     # @responses.activate
     def test_connection_error(self):
