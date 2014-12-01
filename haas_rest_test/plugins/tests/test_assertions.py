@@ -75,10 +75,14 @@ class TestStatusCodeAssertion(unittest.TestCase):
         assertion = StatusCodeAssertion(200)
 
         # When
-        assertion.run(case, response)
+        assertion.run('http://host/uri', case, response)
 
         # Then
-        case.assertEqual.assert_called_once_with(400, 200)
+        self.assertEqual(case.assertEqual.call_count, 1)
+        call = case.assertEqual.call_args
+        args, kwargs = call
+        self.assertEqual(args, (400, 200))
+        self.assertIn('msg', kwargs)
 
     def test_valid_assertion(self):
         # Given
@@ -88,10 +92,14 @@ class TestStatusCodeAssertion(unittest.TestCase):
         assertion = StatusCodeAssertion(200)
 
         # When
-        assertion.run(case, response)
+        assertion.run('http://host/uri', case, response)
 
         # Then
-        case.assertEqual.assert_called_once_with(200, 200)
+        self.assertEqual(case.assertEqual.call_count, 1)
+        call = case.assertEqual.call_args
+        args, kwargs = call
+        self.assertEqual(args, (200, 200))
+        self.assertIn('msg', kwargs)
 
 
 class TestHeaderAssertion(unittest.TestCase):
@@ -140,10 +148,15 @@ class TestHeaderAssertion(unittest.TestCase):
 
         # When
         case = Mock()
-        assertion.run(case, response)
+        assertion.run('http://host/uri', case, response)
 
         # Then
-        case.assertIn.assert_called_once_with(spec['header'], response.headers)
+        self.assertEqual(case.assertIn.call_count, 1)
+        call = case.assertIn.call_args
+        args, kwargs = call
+        self.assertEqual(args, (spec['header'], response.headers))
+        self.assertIn('msg', kwargs)
+
         self.assertFalse(case.assertRegexpMatches.called)
         self.assertFalse(case.assertEqual.called)
 
@@ -171,12 +184,21 @@ class TestHeaderAssertion(unittest.TestCase):
 
         # When
         case = Mock()
-        assertion.run(case, response)
+        assertion.run('http://host/uri', case, response)
 
         # Then
-        case.assertIn.assert_called_once_with(spec['header'], response.headers)
-        case.assertEqual.assert_called_once_with(
-            content_type, expected_content_type)
+        self.assertEqual(case.assertIn.call_count, 1)
+        call = case.assertIn.call_args
+        args, kwargs = call
+        self.assertEqual(args, (spec['header'], response.headers))
+        self.assertIn('msg', kwargs)
+
+        self.assertEqual(case.assertEqual.call_count, 1)
+        call = case.assertEqual.call_args
+        args, kwargs = call
+        self.assertEqual(args, (content_type, expected_content_type))
+        self.assertIn('msg', kwargs)
+
         self.assertFalse(case.assertRegexpMatches.called)
 
     def test_assert_expected_value_failure(self):
@@ -205,12 +227,21 @@ class TestHeaderAssertion(unittest.TestCase):
         case = Mock()
         case.assertEqual.side_effect = AssertionError
         with self.assertRaises(AssertionError):
-            assertion.run(case, response)
+            assertion.run('http://host/uri', case, response)
 
         # Then
-        case.assertIn.assert_called_once_with(spec['header'], response.headers)
-        case.assertEqual.assert_called_once_with(
-            content_type, expected_content_type)
+        self.assertEqual(case.assertIn.call_count, 1)
+        call = case.assertIn.call_args
+        args, kwargs = call
+        self.assertEqual(args, (spec['header'], response.headers))
+        self.assertIn('msg', kwargs)
+
+        self.assertEqual(case.assertEqual.call_count, 1)
+        call = case.assertEqual.call_args
+        args, kwargs = call
+        self.assertEqual(args, (content_type, expected_content_type))
+        self.assertIn('msg', kwargs)
+
         self.assertFalse(case.assertRegexpMatches.called)
 
     def test_assert_expected_regexp(self):
@@ -238,12 +269,21 @@ class TestHeaderAssertion(unittest.TestCase):
 
         # When
         case = Mock()
-        assertion.run(case, response)
+        assertion.run('http://host/uri', case, response)
 
         # Then
-        case.assertIn.assert_called_once_with(spec['header'], response.headers)
-        case.assertRegexpMatches.assert_called_once_with(
-            assertion.expected_value, content_type)
+        self.assertEqual(case.assertIn.call_count, 1)
+        call = case.assertIn.call_args
+        args, kwargs = call
+        self.assertEqual(args, (spec['header'], response.headers))
+        self.assertIn('msg', kwargs)
+
+        self.assertEqual(case.assertRegexpMatches.call_count, 1)
+        call = case.assertRegexpMatches.call_args
+        args, kwargs = call
+        self.assertEqual(args, (content_type, assertion.expected_value))
+        self.assertIn('msg', kwargs)
+
         self.assertFalse(case.assertEqual.called)
 
     def test_assert_expected_regexp_failure(self):
@@ -273,10 +313,18 @@ class TestHeaderAssertion(unittest.TestCase):
         case = Mock()
         case.assertRegexpMatches.side_effect = AssertionError
         with self.assertRaises(AssertionError):
-            assertion.run(case, response)
+            assertion.run('http://host/uri', case, response)
 
         # Then
-        case.assertIn.assert_called_once_with(spec['header'], response.headers)
-        case.assertRegexpMatches.assert_called_once_with(
-            assertion.expected_value, content_type)
+        self.assertEqual(case.assertIn.call_count, 1)
+        call = case.assertIn.call_args
+        args, kwargs = call
+        self.assertEqual(args, (spec['header'], response.headers))
+        self.assertIn('msg', kwargs)
+
+        self.assertEqual(case.assertRegexpMatches.call_count, 1)
+        call = case.assertRegexpMatches.call_args
+        args, kwargs = call
+        self.assertEqual(args, (content_type, assertion.expected_value))
+        self.assertIn('msg', kwargs)
         self.assertFalse(case.assertEqual.called)
