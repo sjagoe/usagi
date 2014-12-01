@@ -48,7 +48,7 @@ def _create_test_method(test):
     def test_method(self):
         test.run(self)
 
-    test_method.__doc__ = test.name
+    setattr(test_method, TEST_NAME_ATTRIBUTE, test.name)
 
     return test_method
 
@@ -65,8 +65,10 @@ def create_test_case_for_case(filename, config, case, assertions_map):
     class_dict[TEST_NAME_ATTRIBUTE] = case['name']
 
     def __str__(self):
-        return '{0} ({1})'.format(
-            getattr(self, TEST_NAME_ATTRIBUTE),
+        method = getattr(self, self._testMethodName)
+        return '{0!r} ({1})'.format(
+            '{}:{}'.format(getattr(self, TEST_NAME_ATTRIBUTE),
+                           getattr(method, TEST_NAME_ATTRIBUTE)),
             filename,
         )
 
