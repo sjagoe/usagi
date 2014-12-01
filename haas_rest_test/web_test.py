@@ -21,15 +21,24 @@ def initialize_assertions(assertion_map, assertion_specs):
         yield cls.from_dict(spec)
 
 
+def _load_headers(headers_map, config):
+    return dict(
+        (header_name, config.load_variable(header_name, header_value))
+        for header_name, header_value in headers_map.items()
+    )
+
+
 class WebTest(object):
 
-    def __init__(self, session, config, name, method, path, assertions):
+    def __init__(self, session, config, name, method, path, headers,
+                 assertions):
         super(WebTest, self).__init__()
         self.session = session
         self.name = name
         self.method = method
         self.config = config
         self.path = path
+        self.headers = headers
         self.assertions = assertions
 
     @property
@@ -56,6 +65,7 @@ class WebTest(object):
             name=spec['name'],
             method=spec.get('method', 'GET'),
             path=spec['url'],
+            headers=_load_headers(spec.get('headers', {}), config),
             assertions=list(assertions),
         )
 
@@ -65,7 +75,8 @@ class WebTest(object):
         except InvalidVariableType as exc:
             case.fail(repr(exc))
         try:
-            response = self.session.request(self.method, url)
+            response = self.session.request(
+                self.method, url, headers=self.headers)
         except ConnectionError as exc:
             case.fail('{0!r}: Unable to connect: {1!r}'.format(url, str(exc)))
         for assertion in self.assertions:
