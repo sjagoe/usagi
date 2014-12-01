@@ -102,7 +102,7 @@ class HeaderAssertion(object):
         if self.regexp:
             msg = '{0!r}: Header {1!r} does not match regexp: {2!r}'.format(
                 url, self.header, self.expected_value)
-            case.assertRegexpMatches(self.expected_value, header, msg=msg)
+            case.assertRegexpMatches(header, self.expected_value, msg=msg)
         else:
             msg = '{0!r}: Header {1!r} does not match expected: {2!r}'.format(
                 url, self.header, self.expected_value)

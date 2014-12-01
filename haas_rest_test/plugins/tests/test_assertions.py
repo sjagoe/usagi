@@ -281,7 +281,7 @@ class TestHeaderAssertion(unittest.TestCase):
         self.assertEqual(case.assertRegexpMatches.call_count, 1)
         call = case.assertRegexpMatches.call_args
         args, kwargs = call
-        self.assertEqual(args, (assertion.expected_value, content_type))
+        self.assertEqual(args, (content_type, assertion.expected_value))
         self.assertIn('msg', kwargs)
 
         self.assertFalse(case.assertEqual.called)
@@ -325,6 +325,6 @@ class TestHeaderAssertion(unittest.TestCase):
         self.assertEqual(case.assertRegexpMatches.call_count, 1)
         call = case.assertRegexpMatches.call_args
         args, kwargs = call
-        self.assertEqual(args, (assertion.expected_value, content_type))
+        self.assertEqual(args, (content_type, assertion.expected_value))
         self.assertIn('msg', kwargs)
         self.assertFalse(case.assertEqual.called)
