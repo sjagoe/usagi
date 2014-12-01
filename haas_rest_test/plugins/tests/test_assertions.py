@@ -13,7 +13,7 @@ from mock import Mock
 from haas.testing import unittest
 
 from haas_rest_test.exceptions import YamlParseError
-from ..assertions import HeaderAssertion, StatusCodeAssertion
+from ..assertions import BodyAssertion, HeaderAssertion, StatusCodeAssertion
 
 
 class TestStatusCodeAssertion(unittest.TestCase):
@@ -328,3 +328,60 @@ class TestHeaderAssertion(unittest.TestCase):
         self.assertEqual(args, (content_type, assertion.expected_value))
         self.assertIn('msg', kwargs)
         self.assertFalse(case.assertEqual.called)
+
+
+class TestBodyAssertion(unittest.TestCase):
+
+    def test_missing_value(self):
+        # Given
+        spec = {
+            'type': 'body',
+        }
+        # When/Then
+        with self.assertRaises(YamlParseError):
+            BodyAssertion.from_dict(spec)
+
+    def test_body_assertion_plain(self):
+        # Given
+        expected = 'I am a plaintext response'
+        spec = {
+            'type': 'body',
+            'value': expected,
+        }
+        assertion = BodyAssertion.from_dict(spec)
+        case = Mock()
+        response = Mock()
+        response.body = expected
+
+        # When
+        assertion.run('url', case, response)
+
+        # Then
+        self.assertEqual(case.assertEqual.call_count, 1)
+        call = case.assertEqual.call_args
+        args, kwargs = call
+        self.assertEqual(args, (spec['value'], assertion.value))
+        self.assertIn('msg', kwargs)
+
+    def test_body_assertion_json(self):
+        # Given
+        expected = {'expected': 'value'}
+        spec = {
+            'type': 'body',
+            'format': 'json',
+            'value': expected,
+        }
+        assertion = BodyAssertion.from_dict(spec)
+        case = Mock()
+        response = Mock()
+        response.json.return_value = expected
+
+        # When
+        assertion.run('url', case, response)
+
+        # Then
+        self.assertEqual(case.assertEqual.call_count, 1)
+        call = case.assertEqual.call_args
+        args, kwargs = call
+        self.assertEqual(args, (spec['value'], assertion.value))
+        self.assertIn('msg', kwargs)
