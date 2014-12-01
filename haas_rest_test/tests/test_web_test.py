@@ -144,7 +144,6 @@ class TestWebTest(unittest.TestCase):
         self.assertEqual(args, (204, 200))
         self.assertIn('msg', kwargs)
 
-    # @responses.activate
     def test_connection_error(self):
         # Given
         config = Config.from_dict({'host': 'test.invalid'}, __file__)
@@ -243,3 +242,44 @@ class TestWebTest(unittest.TestCase):
             args[0],
             """InvalidVariableType\(u?['"]Missing type.*"""
         )
+
+    @responses.activate
+    def test_create_with_headers(self):
+        # Given
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
+        session = create_session()
+        name = 'A test'
+        url = '/api/test'
+        header = 'Authorization'
+        header_value = 'Basic 1234abc=='
+        test_spec = {
+            'name': name,
+            'url': url,
+            'headers': {
+                header: header_value,
+            },
+        }
+        assertions = {}
+
+        self.headers = None
+
+        def callback(request):
+            self.headers = request.headers
+            return (200, {}, '')
+
+        responses.add_callback(
+            responses.GET,
+            'http://test.invalid/api/test',
+            callback=callback,
+        )
+
+        test = WebTest.from_dict(session, test_spec, config, assertions)
+
+        # When
+        case = Mock()
+        test.run(case)
+
+        # Then
+        self.assertIsNotNone(self.headers)
+        self.assertIn(header, self.headers)
+        self.assertEqual(self.headers[header], header_value)
