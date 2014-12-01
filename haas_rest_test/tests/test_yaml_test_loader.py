@@ -238,4 +238,4 @@ class TestYamlTestLoader(unittest.TestCase):
 
         # Then
         self.assertEqual(case_str, "'Basic:Test root URL' (/path/to/foo.yaml)")
-        self.assertIsNont(description)
+        self.assertIsNone(description)
