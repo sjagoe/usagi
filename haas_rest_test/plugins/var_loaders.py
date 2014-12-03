@@ -207,3 +207,50 @@ class FileVarLoader(IVarLoader):
     @property
     def value(self):
         return self._value
+
+
+class RefVarLoader(IVarLoader):
+
+    _schema = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'Create a var equal to another var',
+        'description': 'Var markup for Haas Rest Test',
+        'type': 'object',
+        'properties': {
+            'type': {
+                'enum': ['var'],
+            },
+            'var': {
+                'type': 'string',
+            },
+        },
+        'required': ['type', 'var']
+    }
+
+    def __init__(self, name, var_name):
+        super(RefVarLoader, self).__init__()
+        self.name = name
+        self._var_name = var_name
+        self._value = None
+        self._is_loaded = False
+
+    @classmethod
+    def from_dict(cls, name, var_dict):
+        try:
+            jsonschema.validate(var_dict, cls._schema)
+        except ValidationError as e:
+            raise YamlParseError(str(e))
+        return cls(
+            name=name,
+            var_name=var_dict['var'],
+        )
+
+    def load(self, filename, variables):
+        if not self._is_loaded and self._var_name in variables:
+            self._value = variables[self._var_name]
+            self._is_loaded = True
+        return self._is_loaded
+
+    @property
+    def value(self):
+        return self._value
