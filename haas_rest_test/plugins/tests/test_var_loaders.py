@@ -15,7 +15,8 @@ from haas.testing import unittest
 
 from haas_rest_test.exceptions import InvalidVariable, YamlParseError
 from haas_rest_test.tests.utils import environment
-from ..var_loaders import EnvVarLoader, FileVarLoader, TemplateVarLoader
+from ..var_loaders import (
+    EnvVarLoader, FileVarLoader, RefVarLoader, TemplateVarLoader)
 
 
 class TestEnvVarLoader(unittest.TestCase):
@@ -344,3 +345,69 @@ class TestFileVarLoader(unittest.TestCase):
         # When/Then
         with self.assertRaises(YamlParseError):
             FileVarLoader.from_dict('name', var_dict)
+
+
+class TestRefVarLoader(unittest.TestCase):
+
+    def test_validation_failure(self):
+        name = 'ref_var'
+        var_dict = {
+            'type': 'foo',
+            'var': 'VAR',
+        }
+
+        # When/Then
+        with self.assertRaises(YamlParseError):
+            RefVarLoader.from_dict(name, var_dict)
+
+        name = 'ref_var'
+        var_dict = {
+            'type': 'var',
+        }
+
+        # When/Then
+        with self.assertRaises(YamlParseError):
+            RefVarLoader.from_dict(name, var_dict)
+
+        # Given
+        var_dict = {
+            'var': 'other_var',
+        }
+
+        # When/Then
+        with self.assertRaises(YamlParseError):
+            RefVarLoader.from_dict(name, var_dict)
+
+    def test_ref_var_loader_basic(self):
+        # Given
+        name = 'ref_var'
+        var_dict = {
+            'type': 'var',
+            'var': 'other_var',
+        }
+        value = 'Ref var value'
+        loader = RefVarLoader.from_dict(name, var_dict)
+
+        # When
+        is_loaded = loader.load(__file__, {'other_var': value})
+
+        # Then
+        self.assertTrue(is_loaded)
+        self.assertEqual(loader.name, name)
+        self.assertEqual(loader.value, value)
+
+    def test_ref_var_loader_missing_reference(self):
+        # Given
+        name = 'ref_var'
+        var_dict = {
+            'type': 'var',
+            'var': 'other_var',
+        }
+        loader = RefVarLoader.from_dict(name, var_dict)
+
+        # When
+        is_loaded = loader.load(__file__, {})
+
+        # Then
+        self.assertFalse(is_loaded)
+        self.assertEqual(loader.name, name)
