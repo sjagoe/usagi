@@ -12,6 +12,7 @@ from mock import Mock
 
 from haas.testing import unittest
 
+from haas_rest_test.config import Config
 from haas_rest_test.exceptions import YamlParseError
 from ..assertions import BodyAssertion, HeaderAssertion, StatusCodeAssertion
 
@@ -69,13 +70,14 @@ class TestStatusCodeAssertion(unittest.TestCase):
 
     def test_failed_assertion(self):
         # Given
+        config = Config.from_dict({'host': 'host'}, __file__)
         response = Mock()
         response.status_code = 400
         case = Mock()
         assertion = StatusCodeAssertion(200)
 
         # When
-        assertion.run('http://host/uri', case, response)
+        assertion.run(config, 'http://host/uri', case, response)
 
         # Then
         self.assertEqual(case.assertEqual.call_count, 1)
@@ -86,13 +88,14 @@ class TestStatusCodeAssertion(unittest.TestCase):
 
     def test_valid_assertion(self):
         # Given
+        config = Config.from_dict({'host': 'host'}, __file__)
         response = Mock()
         response.status_code = 200
         case = Mock()
         assertion = StatusCodeAssertion(200)
 
         # When
-        assertion.run('http://host/uri', case, response)
+        assertion.run(config, 'http://host/uri', case, response)
 
         # Then
         self.assertEqual(case.assertEqual.call_count, 1)
@@ -129,6 +132,7 @@ class TestHeaderAssertion(unittest.TestCase):
 
     def test_no_expected_value(self):
         # Given
+        config = Config.from_dict({'host': 'host'}, __file__)
         response = Mock()
         response.headers = {
             'Content-Type': 'application/json'
@@ -148,7 +152,7 @@ class TestHeaderAssertion(unittest.TestCase):
 
         # When
         case = Mock()
-        assertion.run('http://host/uri', case, response)
+        assertion.run(config, 'http://host/uri', case, response)
 
         # Then
         self.assertEqual(case.assertIn.call_count, 1)
@@ -162,6 +166,7 @@ class TestHeaderAssertion(unittest.TestCase):
 
     def test_assert_expected_value(self):
         # Given
+        config = Config.from_dict({'host': 'host'}, __file__)
         content_type = 'application/json'
         expected_content_type = content_type
         response = Mock()
@@ -184,7 +189,7 @@ class TestHeaderAssertion(unittest.TestCase):
 
         # When
         case = Mock()
-        assertion.run('http://host/uri', case, response)
+        assertion.run(config, 'http://host/uri', case, response)
 
         # Then
         self.assertEqual(case.assertIn.call_count, 1)
@@ -203,6 +208,7 @@ class TestHeaderAssertion(unittest.TestCase):
 
     def test_assert_expected_value_failure(self):
         # Given
+        config = Config.from_dict({'host': 'host'}, __file__)
         content_type = 'application/json'
         expected_content_type = 'text/html'
         response = Mock()
@@ -227,7 +233,7 @@ class TestHeaderAssertion(unittest.TestCase):
         case = Mock()
         case.assertEqual.side_effect = AssertionError
         with self.assertRaises(AssertionError):
-            assertion.run('http://host/uri', case, response)
+            assertion.run(config, 'http://host/uri', case, response)
 
         # Then
         self.assertEqual(case.assertIn.call_count, 1)
@@ -246,6 +252,7 @@ class TestHeaderAssertion(unittest.TestCase):
 
     def test_assert_expected_regexp(self):
         # Given
+        config = Config.from_dict({'host': 'host'}, __file__)
         content_type = 'application/github.v3+json'
         expected_content_type = 'application/.*?json'
         response = Mock()
@@ -269,7 +276,7 @@ class TestHeaderAssertion(unittest.TestCase):
 
         # When
         case = Mock()
-        assertion.run('http://host/uri', case, response)
+        assertion.run(config, 'http://host/uri', case, response)
 
         # Then
         self.assertEqual(case.assertIn.call_count, 1)
@@ -288,6 +295,7 @@ class TestHeaderAssertion(unittest.TestCase):
 
     def test_assert_expected_regexp_failure(self):
         # Given
+        config = Config.from_dict({'host': 'host'}, __file__)
         content_type = 'text/github.v3+json'
         expected_content_type = 'application/.*?json'
         response = Mock()
@@ -313,7 +321,7 @@ class TestHeaderAssertion(unittest.TestCase):
         case = Mock()
         case.assertRegexpMatches.side_effect = AssertionError
         with self.assertRaises(AssertionError):
-            assertion.run('http://host/uri', case, response)
+            assertion.run(config, 'http://host/uri', case, response)
 
         # Then
         self.assertEqual(case.assertIn.call_count, 1)
@@ -343,6 +351,7 @@ class TestBodyAssertion(unittest.TestCase):
 
     def test_body_assertion_plain(self):
         # Given
+        config = Config.from_dict({'host': 'host'}, __file__)
         expected = 'I am a plaintext response'
         spec = {
             'type': 'body',
@@ -354,7 +363,7 @@ class TestBodyAssertion(unittest.TestCase):
         response.body = expected
 
         # When
-        assertion.run('url', case, response)
+        assertion.run(config, 'url', case, response)
 
         # Then
         self.assertEqual(case.assertEqual.call_count, 1)
@@ -365,11 +374,13 @@ class TestBodyAssertion(unittest.TestCase):
 
     def test_body_assertion_json(self):
         # Given
+        config = Config.from_dict({'host': 'host'}, __file__)
         expected = {'expected': 'value'}
         spec = {
             'type': 'body',
             'format': 'json',
             'value': expected,
+            'lookup-var': False,
         }
         assertion = BodyAssertion.from_dict(spec)
         case = Mock()
@@ -377,7 +388,7 @@ class TestBodyAssertion(unittest.TestCase):
         response.json.return_value = expected
 
         # When
-        assertion.run('url', case, response)
+        assertion.run(config, 'url', case, response)
 
         # Then
         self.assertEqual(case.assertEqual.call_count, 1)
