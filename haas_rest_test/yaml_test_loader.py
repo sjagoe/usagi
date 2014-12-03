@@ -7,6 +7,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
+import sys
 
 from jsonschema.exceptions import ValidationError
 from stevedore.extension import ExtensionManager
@@ -66,10 +67,19 @@ def create_test_case_for_case(filename, config, case, assertions_map):
 
     def __str__(self):
         method = getattr(self, self._testMethodName)
-        return '{0!r} ({1})'.format(
-            '{}:{}'.format(getattr(self, TEST_NAME_ATTRIBUTE),
-                           getattr(method, TEST_NAME_ATTRIBUTE)),
-            filename,
+        template = '{0!r} ({1})'
+        test_name = '{0}:{1}'.format(getattr(self, TEST_NAME_ATTRIBUTE),
+                                     getattr(method, TEST_NAME_ATTRIBUTE))
+        str_filename = filename
+        if six.PY2:
+            encoding = sys.getdefaultencoding()
+            template = template.encode(encoding)
+            test_name = test_name.encode(encoding)
+            if isinstance(str_filename, six.text_type):
+                str_filename = filename.encode(encoding)
+        return template.format(
+            test_name,
+            str_filename,
         )
 
     class_dict['__str__'] = __str__
