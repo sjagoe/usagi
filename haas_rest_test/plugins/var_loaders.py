@@ -218,7 +218,7 @@ class RefVarLoader(IVarLoader):
         'type': 'object',
         'properties': {
             'type': {
-                'enum': ['var'],
+                'enum': ['ref'],
             },
             'var': {
                 'type': 'string',
