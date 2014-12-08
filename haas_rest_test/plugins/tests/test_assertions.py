@@ -372,6 +372,59 @@ class TestBodyAssertion(unittest.TestCase):
         self.assertEqual(args, (spec['value'], assertion.value))
         self.assertIn('msg', kwargs)
 
+    def test_body_assertion_var(self):
+        # Given
+        expected = 'Expected var value'
+        config = Config.from_dict(
+            {'host': 'host', 'vars': {'some_var': expected}},
+            __file__,
+        )
+        spec = {
+            'type': 'body',
+            'value': {'type': 'ref', 'var': 'some_var'},
+        }
+        assertion = BodyAssertion.from_dict(spec)
+        case = Mock()
+        response = Mock()
+        response.body = expected
+
+        # When
+        assertion.run(config, 'url', case, response)
+
+        # Then
+        self.assertEqual(case.assertEqual.call_count, 1)
+        call = case.assertEqual.call_args
+        args, kwargs = call
+        self.assertEqual(args, (expected, expected))
+        self.assertIn('msg', kwargs)
+
+    def test_body_assertion_var_failed(self):
+        # Given
+        response_body = 'Unexpected value'
+        expected = 'Expected var value'
+        config = Config.from_dict(
+            {'host': 'host', 'vars': {'some_var': expected}},
+            __file__,
+        )
+        spec = {
+            'type': 'body',
+            'value': {'type': 'ref', 'var': 'some_var'},
+        }
+        assertion = BodyAssertion.from_dict(spec)
+        case = Mock()
+        response = Mock()
+        response.body = response_body
+
+        # When
+        assertion.run(config, 'url', case, response)
+
+        # Then
+        self.assertEqual(case.assertEqual.call_count, 1)
+        call = case.assertEqual.call_args
+        args, kwargs = call
+        self.assertEqual(args, (response_body, expected))
+        self.assertIn('msg', kwargs)
+
     def test_body_assertion_json(self):
         # Given
         config = Config.from_dict({'host': 'host'}, __file__)
