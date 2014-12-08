@@ -41,7 +41,7 @@ class StatusCodeAssertion(object):
             raise YamlParseError(str(e))
         return cls(expected_status=data['expected'])
 
-    def run(self, url, case, response):
+    def run(self, config, url, case, response):
         msg = '{0!r}: Status {1!r} != {2!r}'.format(
             url, response.status_code, self.expected_status)
         case.assertEqual(response.status_code, self.expected_status, msg=msg)
@@ -92,7 +92,7 @@ class HeaderAssertion(object):
             regexp = True
         return cls(header, value, regexp)
 
-    def run(self, url, case, response):
+    def run(self, config, url, case, response):
         headers = response.headers
         msg = '{0!r}: Header not found: {1!r}'.format(url, self.header)
         case.assertIn(self.header, headers, msg=msg)
@@ -121,17 +121,31 @@ class BodyAssertion(object):
                 'enum': ['plain', 'json'],
                 'default': 'plain',
             },
+            'lookup-var': {
+                'type': 'boolean',
+                'default': True,
+                'description': 'False to prevent resolving the value as a var.',  # noqa
+            },
             'value': {
                 'description': 'The value with which to compare the body',
+                'oneOf': [
+                    {'$ref': '#/definitions/str'},
+                    {'$ref': '#/definitions/obj'},
+                ],
             },
+        },
+        'definitions': {
+            'str': {'type': 'string'},
+            'obj': {'type': 'object'},
         },
         'required': ['value']
     }
 
-    def __init__(self, format, value):
+    def __init__(self, format, value, lookup_var):
         super(BodyAssertion, self).__init__()
         self.format = format
         self.value = value
+        self.lookup_var = lookup_var
 
     @classmethod
     def from_dict(cls, data):
@@ -139,12 +153,19 @@ class BodyAssertion(object):
             jsonschema.validate(data, cls._schema)
         except ValidationError as e:
             raise YamlParseError(str(e))
-        return cls(format=data.get('format', 'plain'), value=data['value'])
+        return cls(
+            format=data.get('format', 'plain'),
+            value=data['value'],
+            lookup_var=data.get('lookup-var', True),
+        )
 
-    def run(self, url, case, response):
+    def run(self, config, url, case, response):
+        value = self.value
+        if self.lookup_var:
+            value = config.load_variable('value', value)
         if self.format == 'json':
             body = response.json()
         else:
             body = response.body
         msg = '{0!r}: Body does not match expected value'.format(url)
-        case.assertEqual(body, self.value, msg=msg)
+        case.assertEqual(body, value, msg=msg)

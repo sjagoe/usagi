@@ -362,7 +362,7 @@ class TestRefVarLoader(unittest.TestCase):
 
         name = 'ref_var'
         var_dict = {
-            'type': 'var',
+            'type': 'ref',
         }
 
         # When/Then
@@ -382,7 +382,7 @@ class TestRefVarLoader(unittest.TestCase):
         # Given
         name = 'ref_var'
         var_dict = {
-            'type': 'var',
+            'type': 'ref',
             'var': 'other_var',
         }
         value = 'Ref var value'
@@ -400,7 +400,7 @@ class TestRefVarLoader(unittest.TestCase):
         # Given
         name = 'ref_var'
         var_dict = {
-            'type': 'var',
+            'type': 'ref',
             'var': 'other_var',
         }
         loader = RefVarLoader.from_dict(name, var_dict)
