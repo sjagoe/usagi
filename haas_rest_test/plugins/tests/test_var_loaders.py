@@ -11,6 +11,9 @@ import json
 import shutil
 import tempfile
 
+import six
+import yaml
+
 from haas.testing import unittest
 
 from haas_rest_test.exceptions import InvalidVariable, YamlParseError
@@ -224,7 +227,7 @@ class TestFileVarLoader(unittest.TestCase):
         expected = 'test data'
         filepath = os.path.abspath(os.path.join(self.tempdir, 'file'))
         test_filepath = os.path.abspath(
-            os.path.join(self.tempdir, 'test.yaml'))
+            os.path.join(self.tempdir, 'test.txt'))
         with open(filepath, 'w') as fh:
             fh.write(data)
 
@@ -247,7 +250,7 @@ class TestFileVarLoader(unittest.TestCase):
         data = '\ntest data\t\n  '
         filepath = os.path.abspath(os.path.join(self.tempdir, 'file'))
         test_filepath = os.path.abspath(
-            os.path.join(self.tempdir, 'test.yaml'))
+            os.path.join(self.tempdir, 'test.txt'))
         with open(filepath, 'w') as fh:
             fh.write(data)
 
@@ -318,6 +321,55 @@ class TestFileVarLoader(unittest.TestCase):
             'type': 'file',
             'file': filepath,
             'format': 'json',
+        }
+
+        loader = FileVarLoader.from_dict('name', var_dict)
+
+        # When
+        is_loaded = loader.load(__file__, {})
+
+        # Then
+        self.assertEqual(is_loaded, True)
+        self.assertEqual(loader.value, expected)
+
+    @unittest.skipIf(six.PY3, 'Yaml/Unicode and Python version issues')
+    def test_load_yaml_file_py2(self):
+        # Given
+        data = {'some'.encode('ascii'):
+                ['yaml'.encode('ascii'), 'structure'.encode('ascii')]}
+        expected = data
+        filepath = os.path.abspath(os.path.join(self.tempdir, 'file.json'))
+        with open(filepath, 'w') as fh:
+            fh.write(yaml.dump(data, default_flow_style=False))
+
+        var_dict = {
+            'type': 'file',
+            'file': filepath,
+            'format': 'yaml',
+        }
+
+        loader = FileVarLoader.from_dict('name', var_dict)
+
+        # When
+        is_loaded = loader.load(__file__, {})
+
+        # Then
+        self.assertEqual(is_loaded, True)
+        self.assertEqual(loader.value, expected)
+
+    @unittest.skipIf(six.PY2, 'Yaml/Unicode and Python version issues')
+    def test_load_yaml_file_py3(self):
+        # Given
+        data = {'some': ['yaml', 'structure']}
+        expected = data
+        filepath = os.path.abspath(os.path.join(self.tempdir, 'file.json'))
+        with open(filepath, 'w') as fh:
+            fh.write(yaml.dump(data, default_flow_style=False))
+
+        var_dict = {
+            'type': 'file',
+            'file': filepath,
+            'format': 'yaml',
         }
 
         loader = FileVarLoader.from_dict('name', var_dict)

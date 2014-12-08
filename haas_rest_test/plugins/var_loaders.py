@@ -11,6 +11,7 @@ import os
 
 from jsonschema.exceptions import ValidationError
 import jsonschema
+import yaml
 
 from ..exceptions import InvalidVariable, YamlParseError
 from .i_var_loader import IVarLoader
@@ -125,6 +126,15 @@ class TemplateVarLoader(IVarLoader):
 
 class FileVarLoader(IVarLoader):
 
+    _format_plain = 'plain'
+    _format_json = 'json'
+    _format_yaml = 'yaml'
+    _format_handlers = {
+        _format_plain: lambda d: d,
+        _format_json: json.loads,
+        _format_yaml: yaml.safe_load,
+    }
+
     _schema = {
         '$schema': 'http://json-schema.org/draft-04/schema#',
         'title': 'Create a var from the contents of a file',
@@ -138,8 +148,8 @@ class FileVarLoader(IVarLoader):
                 'type': 'string',
             },
             'format': {
-                'enum': ['plain', 'json'],
-                'default': 'plain',
+                'enum': [_format_plain, _format_json, _format_yaml],
+                'default': _format_plain,
                 'description': 'Format of the file data',
             },
             'strip': {
@@ -169,7 +179,7 @@ class FileVarLoader(IVarLoader):
         return cls(
             name=name,
             filename=var_dict['file'],
-            format=var_dict.get('format', 'plain'),
+            format=var_dict.get('format', cls._format_plain),
             strip=var_dict.get('strip', True),
         )
 
@@ -195,11 +205,7 @@ class FileVarLoader(IVarLoader):
                         file_path, str(exc)))
             if self._strip:
                 data = data.strip()
-            format = self._format
-            if format == 'plain':
-                value = data
-            elif format == 'json':
-                value = json.loads(data)
+            value = self._format_handlers[self._format](data)
             self._value = value
             self._is_loaded = True
         return self._is_loaded
