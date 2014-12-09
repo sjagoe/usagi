@@ -122,6 +122,7 @@ class TestBodyTestParameter(unittest.TestCase):
         spec = {
             'body': {
                 'format': 'json',
+                'lookup-var': False,
                 'value': {'param': ['value1', 'value2']},
             },
         }
@@ -143,6 +144,7 @@ class TestBodyTestParameter(unittest.TestCase):
         spec = {
             'body': {
                 'format': 'yaml',
+                'lookup-var': False,
                 'value': {'param': ['value1', 'value2']},
             },
         }
@@ -191,12 +193,41 @@ class TestBodyTestParameter(unittest.TestCase):
         spec = {
             'body': {
                 'format': 'none',
+                'lookup-var': False,
                 'value': 'plaintext',
             },
         }
         parameter = BodyTestParameter.from_dict(spec)
         expected = {
             'data': 'plaintext',
+        }
+
+        # When
+        loaded = parameter.load(config)
+
+        # Then
+        self.assertEqual(loaded, expected)
+
+    def test_body_from_var(self):
+        # Given
+        config = Config.from_dict(
+            {
+                'host': 'name.domain',
+                'vars': {
+                    'data': 'some-data',
+                },
+            },
+            __file__)
+        spec = {
+            'body': {
+                'format': 'plain',
+                'value': {'type': 'ref', 'var': 'data'},
+            },
+        }
+        parameter = BodyTestParameter.from_dict(spec)
+        expected = {
+            'headers': {'Content-Type': 'text/plain'},
+            'data': 'some-data',
         }
 
         # When

@@ -172,7 +172,10 @@ class BodyTestParameter(ITestParameter):
             headers = result['headers'] = {}
             headers['Content-Type'] = header
 
-        value = self._format_handlers[format](self._value)
+        value = self._value
+        if self._lookup_var:
+            value = config.load_variable('value', value)
+        value = self._format_handlers[format](value)
 
         result['data'] = value
 
