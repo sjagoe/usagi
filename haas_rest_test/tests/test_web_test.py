@@ -12,7 +12,7 @@ from six.moves import urllib
 
 from haas.testing import unittest
 
-from ..exceptions import InvalidAssertionClass
+from ..exceptions import InvalidAssertionClass, InvalidParameterClass
 from ..plugins.assertions import StatusCodeAssertion
 from ..plugins.test_parameters import (
     HeadersTestParameter,
@@ -343,3 +343,24 @@ class TestWebTest(unittest.TestCase):
         self.assertIsNotNone(self.headers)
         self.assertIn(header, self.headers)
         self.assertEqual(self.headers[header], header_value)
+
+    def test_create_with_invalid_parameter(self):
+        # Given
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
+        session = create_session()
+        name = 'A test'
+        url = '/api/test'
+        test_spec = {
+            'name': name,
+            'url': url,
+            'parameters': {
+                'dont_exist': 'value',
+            },
+        }
+        assertions = {}
+
+        # When/Then
+        with self.assertRaises(InvalidParameterClass):
+            WebTest.from_dict(
+                session, test_spec, config, assertions,
+                self.test_parameter_plugins)
