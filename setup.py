@@ -156,6 +156,7 @@ if __name__ == "__main__":
                 'header = haas_rest_test.plugins.assertions:HeaderAssertion',
             ],
             'haas_rest_test.parameters': [
+                'body = haas_rest_test.plugins.test_parameters:BodyTestParameter',  # noqa
                 'method = haas_rest_test.plugins.test_parameters:MethodTestParameter',  # noqa
                 'headers = haas_rest_test.plugins.test_parameters:HeadersTestParameter',  # noqa
             ],
