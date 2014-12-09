@@ -149,6 +149,8 @@ Example Test
                 template: "{metadata}/auth/required"
               parameters:
                 method: GET
+                headers:
+                  Content-Type: application/json
               assertions:
                 - name: status_code
                   expected: 401
