@@ -22,7 +22,7 @@ class MethodTestParameter(ITestParameter):
         'type': 'object',
         'properties': {
             'method': {
-                'type': 'string',
+                'enum': ['GET', 'POST', 'DELETE', 'PUT', 'HEAD'],
             },
         },
         'required': ['method']
