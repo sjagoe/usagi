@@ -15,6 +15,7 @@ from haas.testing import unittest
 from ..exceptions import InvalidAssertionClass
 from ..plugins.assertions import StatusCodeAssertion
 from ..plugins.test_parameters import (
+    HeadersTestParameter,
     MethodTestParameter,
 )
 from ..config import Config
@@ -26,6 +27,7 @@ class TestWebTest(unittest.TestCase):
 
     def setUp(self):
         self.test_parameter_plugins = {
+            'headers': HeadersTestParameter,
             'method': MethodTestParameter,
         }
 
@@ -309,8 +311,10 @@ class TestWebTest(unittest.TestCase):
         test_spec = {
             'name': name,
             'url': url,
-            'headers': {
-                header: header_value,
+            'parameters': {
+                'headers': {
+                    header: header_value,
+                },
             },
         }
         assertions = {}

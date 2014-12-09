@@ -39,14 +39,13 @@ def initialize_test_parameters(test_parameter_plugins, parameter_specs):
 
 class WebTest(object):
 
-    def __init__(self, session, config, name, path, headers,
-                 assertions, test_parameters):
+    def __init__(self, session, config, name, path, assertions,
+                 test_parameters):
         super(WebTest, self).__init__()
         self.session = session
         self.name = name
         self.config = config
         self.path = path
-        self.headers = headers
         self.assertions = assertions
         self.test_parameters = test_parameters
 
@@ -84,7 +83,6 @@ class WebTest(object):
             config=config,
             name=name,
             path=spec['url'],
-            headers=_load_headers(spec.get('headers', {}), config),
             assertions=list(assertions),
             test_parameters=list(test_parameters),
         )
@@ -106,8 +104,7 @@ class WebTest(object):
         test_parameters = self._get_test_parameters()
 
         try:
-            response = self.session.request(
-                url=url, headers=self.headers, **test_parameters)
+            response = self.session.request(url=url, **test_parameters)
         except ConnectionError as exc:
             case.fail('{0!r}: Unable to connect: {1!r}'.format(url, str(exc)))
         for assertion in self.assertions:
