@@ -39,12 +39,11 @@ def initialize_test_parameters(test_parameter_plugins, parameter_specs):
 
 class WebTest(object):
 
-    def __init__(self, session, config, name, method, path, headers,
+    def __init__(self, session, config, name, path, headers,
                  assertions, test_parameters):
         super(WebTest, self).__init__()
         self.session = session
         self.name = name
-        self.method = method
         self.config = config
         self.path = path
         self.headers = headers
@@ -64,6 +63,10 @@ class WebTest(object):
             ),
         )
 
+    @property
+    def method(self):
+        return self._get_test_parameters()['method']
+
     @classmethod
     def from_dict(cls, session, spec, config, assertions_map,
                   test_parameter_plugins):
@@ -80,7 +83,6 @@ class WebTest(object):
             session=session,
             config=config,
             name=name,
-            method=spec.get('method', 'GET'),
             path=spec['url'],
             headers=_load_headers(spec.get('headers', {}), config),
             assertions=list(assertions),
@@ -88,7 +90,9 @@ class WebTest(object):
         )
 
     def _get_test_parameters(self):
-        parameters = {}
+        parameters = {  # Parameter defaults
+            'method': 'GET',
+        }
         for test_parameter in self.test_parameters:
             parameters.update(test_parameter.load(self.config))
         return parameters
@@ -103,7 +107,7 @@ class WebTest(object):
 
         try:
             response = self.session.request(
-                self.method, url, headers=self.headers, **test_parameters)
+                url=url, headers=self.headers, **test_parameters)
         except ConnectionError as exc:
             case.fail('{0!r}: Unable to connect: {1!r}'.format(url, str(exc)))
         for assertion in self.assertions:

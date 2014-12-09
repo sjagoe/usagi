@@ -62,6 +62,40 @@ class TestWebTest(unittest.TestCase):
         self.assertEqual(test.method, 'GET')
         self.assertEqual(len(test.assertions), 0)
 
+    def test_from_different_method(self):
+        # Given
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
+        session = create_session()
+        name = 'A test'
+        url = '/api/test'
+        test_spec = {
+            'name': name,
+            'url': url,
+            'parameters': {'method': 'POST'},
+        }
+        expected_url = urllib.parse.urlunparse(
+            urllib.parse.ParseResult(
+                config.scheme,
+                config.host,
+                url,
+                None,
+                None,
+                None,
+            ),
+        )
+
+        # When
+        test = WebTest.from_dict(
+            session, test_spec, config, {}, self.test_parameter_plugins)
+
+        # Then
+        self.assertIs(test.session, session)
+        self.assertIs(test.config, config)
+        self.assertEqual(test.name, name)
+        self.assertEqual(test.url, expected_url)
+        self.assertEqual(test.method, 'POST')
+        self.assertEqual(len(test.assertions), 0)
+
     def test_create_with_assertions(self):
         # Given
         config = Config.from_dict({'host': 'test.invalid'}, __file__)
