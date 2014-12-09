@@ -43,3 +43,33 @@ class MethodTestParameter(ITestParameter):
 
     def load(self, config):
         return {self.name: self.method}
+
+
+class HeadersTestParameter(ITestParameter):
+
+    _schema = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'The HTTP headers to add to a request',
+        'description': 'Test case markup for Haas Rest Test',
+        'type': 'object',
+    }
+
+    def __init__(self, headers):
+        super(HeadersTestParameter, self).__init__()
+        self.headers = headers
+        self.name = 'headers'
+
+    @classmethod
+    def from_dict(cls, data):
+        try:
+            jsonschema.validate(data, cls._schema)
+        except ValidationError as e:
+            raise YamlParseError(str(e))
+        return cls(headers=data['headers'])
+
+    def load(self, config):
+        headers = dict(
+            (header_name, config.load_variable(header_name, header_value))
+            for header_name, header_value in self.headers.items()
+        )
+        return {self.name: headers}
