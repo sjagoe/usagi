@@ -11,6 +11,7 @@ from six.moves import urllib
 
 from .exceptions import (
     InvalidAssertionClass, InvalidParameterClass, InvalidVariableType)
+from .plugins.test_parameters import HeadersTestParameter
 
 
 def initialize_assertions(assertion_map, assertion_specs):
@@ -42,7 +43,7 @@ class WebTest(object):
         self.assertions = assertions
         try:
             headers_loader = next(loader for loader in test_parameters
-                                  if loader.name == 'headers')
+                                  if isinstance(loader, HeadersTestParameter))
         except StopIteration:
             headers_loader = None
         self.headers_loader = headers_loader

@@ -6,6 +6,8 @@
 # of the 3-clause BSD license.  See the LICENSE.txt file for details.
 from __future__ import absolute_import, unicode_literals
 
+import json
+
 from mock import Mock
 import responses
 from six.moves import urllib
@@ -15,6 +17,7 @@ from haas.testing import unittest
 from ..exceptions import InvalidAssertionClass, InvalidParameterClass
 from ..plugins.assertions import StatusCodeAssertion
 from ..plugins.test_parameters import (
+    BodyTestParameter,
     HeadersTestParameter,
     MethodTestParameter,
 )
@@ -27,6 +30,7 @@ class TestWebTest(unittest.TestCase):
 
     def setUp(self):
         self.test_parameter_plugins = {
+            'body': BodyTestParameter,
             'headers': HeadersTestParameter,
             'method': MethodTestParameter,
         }
@@ -364,3 +368,53 @@ class TestWebTest(unittest.TestCase):
             WebTest.from_dict(
                 session, test_spec, config, assertions,
                 self.test_parameter_plugins)
+
+    @responses.activate
+    def test_create_with_body(self):
+        # Given
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
+        session = create_session()
+        name = 'A test'
+        url = '/api/test'
+        expected = {'some': ['json', 'structure']}
+        test_spec = {
+            'name': name,
+            'url': url,
+            'parameters': {
+                'body': {
+                    'format': 'json',
+                    'lookup-var': False,
+                    'value': expected,
+                },
+            },
+        }
+        assertions = {}
+
+        self.body = None
+        self.headers = None
+
+        def callback(request):
+            self.body = json.loads(request.body)
+            self.headers = request.headers
+            return (200, {}, '')
+
+        responses.add_callback(
+            responses.GET,
+            'http://test.invalid/api/test',
+            callback=callback,
+        )
+
+        test = WebTest.from_dict(
+            session, test_spec, config, assertions,
+            self.test_parameter_plugins)
+
+        # When
+        case = Mock()
+        test.run(case)
+
+        # Then
+        self.assertIsNotNone(self.body)
+        self.assertIsNotNone(self.headers)
+        self.assertEqual(self.body, expected)
+        self.assertIn('Content-Type', self.headers)
+        self.assertEqual(self.headers['Content-Type'], 'application/json')

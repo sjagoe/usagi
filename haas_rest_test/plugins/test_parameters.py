@@ -6,8 +6,11 @@
 # of the 3-clause BSD license.  See the LICENSE.txt file for details.
 from __future__ import absolute_import, unicode_literals
 
+import json
+
 from jsonschema.exceptions import ValidationError
 import jsonschema
+import yaml
 
 from ..exceptions import YamlParseError
 from .i_test_parameter import ITestParameter
@@ -25,7 +28,7 @@ class MethodTestParameter(ITestParameter):
                 'enum': ['GET', 'POST', 'DELETE', 'PUT', 'HEAD'],
             },
         },
-        'required': ['method']
+        'required': ['method'],
     }
 
     def __init__(self, method):
@@ -57,7 +60,7 @@ class HeadersTestParameter(ITestParameter):
                 'type': 'object',
             },
         },
-        'required': ['headers']
+        'required': ['headers'],
     }
 
     def __init__(self, headers):
@@ -79,3 +82,102 @@ class HeadersTestParameter(ITestParameter):
             for header_name, header_value in self.headers.items()
         )
         return {self.name: headers}
+
+
+class BodyTestParameter(ITestParameter):
+
+    _format_none = 'none'
+    _format_plain = 'plain'
+    _format_json = 'json'
+    _format_yaml = 'yaml'
+    _format_handlers = {
+        _format_none: lambda d: d,
+        _format_plain: lambda d: d,
+        _format_json: json.dumps,
+        _format_yaml: lambda d: yaml.safe_dump(
+            d, default_flow_style=False)
+    }
+
+    _format_content_types = {
+        _format_plain: 'text/plain',
+        _format_json: 'application/json',
+        _format_yaml: 'application/yaml',
+    }
+
+    _schema = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'A body to send with a request',
+        'description': 'Test case markup for Haas Rest Test',
+        'type': 'object',
+        'properties': {
+            'body': {
+                'type': 'object',
+                'parameters': {
+                    'format': {
+                        'enum': [_format_none, _format_plain, _format_json,
+                                 _format_yaml],
+                        'default': _format_none,
+                    },
+                    'lookup-var': {
+                        'type': 'boolean',
+                        'default': True,
+                        'description': 'False to prevent resolving the value as a var.',  # noqa
+                    },
+                    'value': {
+                        'description': 'The value of the body to send.  This will be encoded according to the format',  # noqa
+                        'oneOf': [
+                            {'$ref': '#/definitions/str'},
+                            {'$ref': '#/definitions/obj'},
+                        ],
+                    },
+                },
+                'required': ['value'],
+            },
+        },
+        'required': ['body'],
+        'definitions': {
+            'str': {
+                'type': 'string',
+            },
+            'obj': {
+                'type': 'object',
+            },
+        },
+    }
+
+    def __init__(self, format, lookup_var, value):
+        super(BodyTestParameter, self).__init__()
+        self._format = format
+        self._lookup_var = lookup_var
+        self._value = value
+
+    @classmethod
+    def from_dict(cls, data):
+        try:
+            jsonschema.validate(data, cls._schema)
+        except ValidationError as e:
+            raise YamlParseError(str(e))
+        body = data['body']
+        return cls(
+            format=body.get('format', cls._format_none),
+            lookup_var=body.get('lookup-var', True),
+            value=body['value'],
+        )
+
+    def load(self, config):
+        result = {}
+        format = self._format
+
+        header = self._format_content_types.get(format)
+        if header is not None:
+            headers = result['headers'] = {}
+            headers['Content-Type'] = header
+
+        value = self._value
+        if self._lookup_var:
+            value = config.load_variable('value', value)
+        value = self._format_handlers[format](value)
+
+        result['data'] = value
+
+        return result

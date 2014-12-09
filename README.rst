@@ -157,3 +157,17 @@ Example Test
                 - name: header
                   header: WWW-Authenticate
                   regexp: "Basic realm=.*"
+            - name: "POST json"
+              url:
+                type: template
+                template: "{metadata}/post"
+              parameters:
+                method: POST
+                body:
+                  format: json
+                  lookup-var: false
+                  value:
+                    some: ["json-compatible", "structure"]
+              assertions:
+                - name: status_code
+                  expected: 204
