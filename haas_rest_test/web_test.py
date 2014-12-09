@@ -22,13 +22,6 @@ def initialize_assertions(assertion_map, assertion_specs):
         yield cls.from_dict(spec)
 
 
-def _load_headers(headers_map, config):
-    return dict(
-        (header_name, config.load_variable(header_name, header_value))
-        for header_name, header_value in headers_map.items()
-    )
-
-
 def initialize_test_parameters(test_parameter_plugins, parameter_specs):
     for name, value in parameter_specs.items():
         cls = test_parameter_plugins.get(name)
