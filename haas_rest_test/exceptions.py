@@ -10,6 +10,10 @@ class InvalidAssertionClass(HaasRestTestError):
     pass
 
 
+class InvalidParameterClass(HaasRestTestError):
+    pass
+
+
 class InvalidVariable(HaasRestTestError):
     pass
 

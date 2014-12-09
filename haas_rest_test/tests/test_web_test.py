@@ -12,14 +12,24 @@ from six.moves import urllib
 
 from haas.testing import unittest
 
-from ..exceptions import InvalidAssertionClass
+from ..exceptions import InvalidAssertionClass, InvalidParameterClass
 from ..plugins.assertions import StatusCodeAssertion
+from ..plugins.test_parameters import (
+    HeadersTestParameter,
+    MethodTestParameter,
+)
 from ..config import Config
 from ..utils import create_session
 from ..web_test import WebTest
 
 
 class TestWebTest(unittest.TestCase):
+
+    def setUp(self):
+        self.test_parameter_plugins = {
+            'headers': HeadersTestParameter,
+            'method': MethodTestParameter,
+        }
 
     def test_from_dict(self):
         # Given
@@ -43,7 +53,8 @@ class TestWebTest(unittest.TestCase):
         )
 
         # When
-        test = WebTest.from_dict(session, test_spec, config, {})
+        test = WebTest.from_dict(
+            session, test_spec, config, {}, self.test_parameter_plugins)
 
         # Then
         self.assertIs(test.session, session)
@@ -51,6 +62,40 @@ class TestWebTest(unittest.TestCase):
         self.assertEqual(test.name, name)
         self.assertEqual(test.url, expected_url)
         self.assertEqual(test.method, 'GET')
+        self.assertEqual(len(test.assertions), 0)
+
+    def test_from_different_method(self):
+        # Given
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
+        session = create_session()
+        name = 'A test'
+        url = '/api/test'
+        test_spec = {
+            'name': name,
+            'url': url,
+            'parameters': {'method': 'POST'},
+        }
+        expected_url = urllib.parse.urlunparse(
+            urllib.parse.ParseResult(
+                config.scheme,
+                config.host,
+                url,
+                None,
+                None,
+                None,
+            ),
+        )
+
+        # When
+        test = WebTest.from_dict(
+            session, test_spec, config, {}, self.test_parameter_plugins)
+
+        # Then
+        self.assertIs(test.session, session)
+        self.assertIs(test.config, config)
+        self.assertEqual(test.name, name)
+        self.assertEqual(test.url, expected_url)
+        self.assertEqual(test.method, 'POST')
         self.assertEqual(len(test.assertions), 0)
 
     def test_create_with_assertions(self):
@@ -74,7 +119,9 @@ class TestWebTest(unittest.TestCase):
         }
 
         # When
-        test = WebTest.from_dict(session, test_spec, config, assertions)
+        test = WebTest.from_dict(
+            session, test_spec, config, assertions,
+            self.test_parameter_plugins)
 
         # Then
         self.assertEqual(len(test.assertions), 1)
@@ -102,7 +149,9 @@ class TestWebTest(unittest.TestCase):
 
         # When/Then
         with self.assertRaises(InvalidAssertionClass):
-            WebTest.from_dict(session, test_spec, config, assertions)
+            WebTest.from_dict(
+                session, test_spec, config, assertions,
+                self.test_parameter_plugins)
 
     @responses.activate
     def test_run(self):
@@ -125,7 +174,9 @@ class TestWebTest(unittest.TestCase):
             'status_code': StatusCodeAssertion,
         }
 
-        test = WebTest.from_dict(session, test_spec, config, assertions)
+        test = WebTest.from_dict(
+            session, test_spec, config, assertions,
+            self.test_parameter_plugins)
 
         responses.add(
             test.method,
@@ -164,7 +215,9 @@ class TestWebTest(unittest.TestCase):
             'status_code': StatusCodeAssertion,
         }
 
-        test = WebTest.from_dict(session, test_spec, config, assertions)
+        test = WebTest.from_dict(
+            session, test_spec, config, assertions,
+            self.test_parameter_plugins)
 
         # When
         case = Mock()
@@ -206,7 +259,8 @@ class TestWebTest(unittest.TestCase):
         )
 
         # When
-        test = WebTest.from_dict(session, test_spec, config, {})
+        test = WebTest.from_dict(
+            session, test_spec, config, {}, self.test_parameter_plugins)
 
         # Then
         self.assertEqual(test.url, expected_url)
@@ -227,7 +281,9 @@ class TestWebTest(unittest.TestCase):
             'name': name,
             'url': url,
         }
-        test = WebTest.from_dict(session, test_spec, config, {})
+        test = WebTest.from_dict(
+            session, test_spec, config, {},
+            self.test_parameter_plugins)
         case = Mock()
         case.fail.side_effect = AssertionError
 
@@ -255,8 +311,10 @@ class TestWebTest(unittest.TestCase):
         test_spec = {
             'name': name,
             'url': url,
-            'headers': {
-                header: header_value,
+            'parameters': {
+                'headers': {
+                    header: header_value,
+                },
             },
         }
         assertions = {}
@@ -273,7 +331,9 @@ class TestWebTest(unittest.TestCase):
             callback=callback,
         )
 
-        test = WebTest.from_dict(session, test_spec, config, assertions)
+        test = WebTest.from_dict(
+            session, test_spec, config, assertions,
+            self.test_parameter_plugins)
 
         # When
         case = Mock()
@@ -283,3 +343,24 @@ class TestWebTest(unittest.TestCase):
         self.assertIsNotNone(self.headers)
         self.assertIn(header, self.headers)
         self.assertEqual(self.headers[header], header_value)
+
+    def test_create_with_invalid_parameter(self):
+        # Given
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
+        session = create_session()
+        name = 'A test'
+        url = '/api/test'
+        test_spec = {
+            'name': name,
+            'url': url,
+            'parameters': {
+                'dont_exist': 'value',
+            },
+        }
+        assertions = {}
+
+        # When/Then
+        with self.assertRaises(InvalidParameterClass):
+            WebTest.from_dict(
+                session, test_spec, config, assertions,
+                self.test_parameter_plugins)

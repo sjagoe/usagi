@@ -100,10 +100,7 @@ SCHEMA = {
         'test': {
             'type': 'object',
             'properties': {
-                'method': {
-                    'enum': ['GET', 'POST', 'DELETE', 'PUT', 'HEAD'],
-                    'default': 'GET',
-                },
+                'parameters': {'type': 'object'},
                 'url': {
                     'oneOf': [
                         {'$ref': '#/definitions/simple_var'},

@@ -144,10 +144,13 @@ Example Test
         - name: "A case"
           tests:
             - name: "Authentication failure"
-              method: GET
               url:
                 type: template
                 template: "{metadata}/auth/required"
+              parameters:
+                method: GET
+                headers:
+                  Content-Type: application/json
               assertions:
                 - name: status_code
                   expected: 401
