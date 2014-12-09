@@ -94,7 +94,8 @@ class BodyTestParameter(ITestParameter):
         _format_none: lambda d: d,
         _format_plain: lambda d: d,
         _format_json: json.dumps,
-        _format_yaml: lambda d: yaml.dump(d, default_flow_style=False)
+        _format_yaml: lambda d: yaml.safe_dump(
+            d, default_flow_style=False)
     }
 
     _format_content_types = {
