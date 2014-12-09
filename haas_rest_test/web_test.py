@@ -40,7 +40,14 @@ class WebTest(object):
         self.config = config
         self.path = path
         self.assertions = assertions
-        self.test_parameters = test_parameters
+        try:
+            headers_loader = next(loader for loader in test_parameters
+                                  if loader.name == 'headers')
+        except StopIteration:
+            headers_loader = None
+        self.headers_loader = headers_loader
+        self.test_parameters = [loader for loader in test_parameters
+                                if loader is not headers_loader]
 
     @property
     def url(self):
@@ -81,11 +88,22 @@ class WebTest(object):
         )
 
     def _get_test_parameters(self):
+        config = self.config
+        all_headers = {}
         parameters = {  # Parameter defaults
             'method': 'GET',
         }
+
         for test_parameter in self.test_parameters:
-            parameters.update(test_parameter.load(self.config))
+            loaded = test_parameter.load(config)
+            all_headers.update(loaded.get('headers', {}))
+            parameters.update(loaded)
+
+        if self.headers_loader is not None:
+            headers = self.headers_loader.load(config)
+            all_headers.update(headers.get('headers', {}))
+
+        parameters['headers'] = all_headers
         return parameters
 
     def run(self, case):
