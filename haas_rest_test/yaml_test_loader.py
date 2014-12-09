@@ -54,11 +54,15 @@ def _create_test_method(test):
     return test_method
 
 
-def create_test_case_for_case(filename, config, case, assertions_map):
+def create_test_case_for_case(filename, config, case, assertions_map,
+                              test_parameter_plugins):
     session = create_session()
 
-    tests = [WebTest.from_dict(session, spec, config, assertions_map)
-             for spec in case['tests']]
+    tests = [
+        WebTest.from_dict(
+            session, spec, config, assertions_map, test_parameter_plugins)
+        for spec in case['tests']
+    ]
     class_dict = dict(
         ('test_{0}'.format(index), _create_test_method(test))
         for index, test in enumerate(tests)
@@ -95,12 +99,21 @@ class YamlTestLoader(object):
     def __init__(self, loader):
         super(YamlTestLoader, self).__init__()
         self._loader = loader
+
         assertions = ExtensionManager(
             namespace='haas_rest_test.assertions',
         )
+        test_parameters = ExtensionManager(
+            namespace='haas_rest_test.parameters'
+        )
+
         self._assertions_map = dict(
             (name, assertions[name].plugin)
             for name in assertions.names()
+        )
+        self._test_parameters = dict(
+            (name, test_parameters[name].plugin)
+            for name in test_parameters.names()
         )
 
     def load_tests_from_file(self, filename):
@@ -118,7 +131,8 @@ class YamlTestLoader(object):
         config = Config.from_dict(test_structure['config'], filename)
         cases = (
             create_test_case_for_case(
-                filename, config, case, self._assertions_map)
+                filename, config, case, self._assertions_map,
+                self._test_parameters)
             for case in test_structure['cases']
         )
         tests = [loader.load_case(case) for case in cases]
