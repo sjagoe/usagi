@@ -12,9 +12,10 @@ from jsonschema.exceptions import ValidationError
 import jsonschema
 
 from ..exceptions import YamlParseError
+from .i_assertion import IAssertion
 
 
-class StatusCodeAssertion(object):
+class StatusCodeAssertion(IAssertion):
 
     _schema = {
         '$schema': 'http://json-schema.org/draft-04/schema#',
@@ -47,7 +48,7 @@ class StatusCodeAssertion(object):
         case.assertEqual(response.status_code, self.expected_status, msg=msg)
 
 
-class HeaderAssertion(object):
+class HeaderAssertion(IAssertion):
 
     _schema = {
         '$schema': 'http://json-schema.org/draft-04/schema#',
@@ -109,7 +110,7 @@ class HeaderAssertion(object):
             case.assertEqual(header, self.expected_value, msg=msg)
 
 
-class BodyAssertion(object):
+class BodyAssertion(IAssertion):
 
     _schema = {
         '$schema': 'http://json-schema.org/draft-04/schema#',
