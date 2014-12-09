@@ -52,6 +52,12 @@ class HeadersTestParameter(ITestParameter):
         'title': 'The HTTP headers to add to a request',
         'description': 'Test case markup for Haas Rest Test',
         'type': 'object',
+        'properties': {
+            'headers': {
+                'type': 'object',
+            },
+        },
+        'required': ['headers']
     }
 
     def __init__(self, headers):

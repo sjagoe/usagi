@@ -38,6 +38,14 @@ class TestMethodTestParameter(unittest.TestCase):
 
 class TestHeadersTestParameter(unittest.TestCase):
 
+    def test_invalid_object(self):
+        # Given
+        spec = {'headers': 'a-string'}
+
+        # When/Then
+        with self.assertRaises(YamlParseError):
+            HeadersTestParameter.from_dict(spec)
+
     def test_load(self):
         # Given
         config = Config.from_dict({'host': 'name.domain'}, __file__)
