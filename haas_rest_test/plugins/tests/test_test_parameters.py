@@ -16,7 +16,8 @@ from haas.testing import unittest
 from haas_rest_test.config import Config
 from haas_rest_test.exceptions import InvalidVariable, YamlParseError
 from ..test_parameters import (
-    BodyTestParameter, HeadersTestParameter, MethodTestParameter)
+    BodyTestParameter, HeadersTestParameter, MethodTestParameter,
+    QueryParamsTestParameter)
 
 
 class TestMethodTestParameter(unittest.TestCase):
@@ -384,3 +385,54 @@ class TestBodyTestParameterMultipartFile(unittest.TestCase):
 
             fh2 = data['field2']
             self.assertEqual(fh2.name, self.absolute_filename)
+
+
+class TestQueryParamsTestParameter(unittest.TestCase):
+
+    def test_invalid_no_params(self):
+        # Given
+        spec = {
+            'queryparams': 'string',
+        }
+
+        # When/Then
+        with self.assertRaises(YamlParseError):
+            QueryParamsTestParameter.from_dict(spec)
+
+    def test_non_string_param(self):
+        # Given
+        spec = {
+            'queryparams': {
+                'param': {},
+            },
+        }
+
+        # When/Then
+        with self.assertRaises(YamlParseError):
+            QueryParamsTestParameter.from_dict(spec)
+
+    def test_load(self):
+        # Given
+        config = Config.from_dict({'host': 'name.domain'}, __file__)
+        expected = {
+            'params': {
+                'str': 'string value',
+                'int': 5,
+                'float': 5.2,
+                'bool': False,
+            },
+        }
+        spec = {
+            'queryparams': {
+                'str': 'string value',
+                'int': 5,
+                'float': 5.2,
+                'bool': False,
+            },
+        }
+
+        loader = QueryParamsTestParameter.from_dict(spec)
+
+        # When
+        with loader.load(config) as loaded:
+            self.assertEqual(loaded, expected)
