@@ -54,15 +54,32 @@ def _create_test_method(test):
     return test_method
 
 
+def _create_reused_tests(session, config, assertions_map,
+                         test_parameter_plugins, test_names, test_definitions):
+    return [
+        WebTest.from_dict(
+            session, spec, config, assertions_map,
+            test_parameter_plugins)
+        for name in test_names
+        for spec in test_definitions[name]
+    ]
+
+
 def create_test_case_for_case(filename, config, case, assertions_map,
-                              test_parameter_plugins):
+                              test_parameter_plugins, test_definitions):
     session = create_session()
 
-    tests = [
+    pre_run_cases = _create_reused_tests(
+        session, config, assertions_map, test_parameter_plugins,
+        case.get('case-setup', []), test_definitions)
+    post_run_cases = _create_reused_tests(
+        session, config, assertions_map, test_parameter_plugins,
+        case.get('case-teardown', []), test_definitions)
+    tests = pre_run_cases + [
         WebTest.from_dict(
             session, spec, config, assertions_map, test_parameter_plugins)
         for spec in case['tests']
-    ]
+    ] + post_run_cases
     class_dict = dict(
         ('test_{0}'.format(index), _create_test_method(test))
         for index, test in enumerate(tests)
@@ -129,10 +146,13 @@ class YamlTestLoader(object):
             test = _create_yaml_parse_error_test(filename, str(e))
             return loader.create_suite([test])
         config = Config.from_dict(test_structure['config'], filename)
+
+        test_pre_definitions = test_structure.get('test-pre-definitions', {})
+
         cases = (
             create_test_case_for_case(
                 filename, config, case, self._assertions_map,
-                self._test_parameters)
+                self._test_parameters, test_pre_definitions)
             for case in test_structure['cases']
         )
         tests = [loader.load_case(case) for case in cases]
