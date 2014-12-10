@@ -80,8 +80,11 @@ def create_test_case_for_case(filename, config, case, assertions_map,
             session, spec, config, assertions_map, test_parameter_plugins)
         for spec in case['tests']
     ] + post_run_cases
+    test_count = len(tests)
     class_dict = dict(
-        ('test_{0}'.format(index), _create_test_method(test))
+        ('test_{index:0>{test_count}}'.format(
+            index=index, test_count=test_count),
+         _create_test_method(test))
         for index, test in enumerate(tests)
     )
     class_dict[TEST_NAME_ATTRIBUTE] = case['name']
