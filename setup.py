@@ -157,8 +157,9 @@ if __name__ == "__main__":
             ],
             'haas_rest_test.parameters': [
                 'body = haas_rest_test.plugins.test_parameters:BodyTestParameter',  # noqa
-                'method = haas_rest_test.plugins.test_parameters:MethodTestParameter',  # noqa
                 'headers = haas_rest_test.plugins.test_parameters:HeadersTestParameter',  # noqa
+                'method = haas_rest_test.plugins.test_parameters:MethodTestParameter',  # noqa
+                'queryparams = haas_rest_test.plugins.test_parameters:QueryParamsTestParameter',  # noqa
             ],
             'haas_rest_test.var_loaders': [
                 'env = haas_rest_test.plugins.var_loaders:EnvVarLoader',
