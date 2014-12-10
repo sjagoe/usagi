@@ -300,3 +300,50 @@ class BodyTestParameter(ITestParameter):
         with self._get_value(config) as value:
             result.update(value)
             yield result
+
+
+class QueryParamsTestParameter(ITestParameter):
+
+    _schema = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'The query parameters to attach to a URL for a GET request',
+        'description': 'Test case markup for Haas Rest Test',
+        'type': 'object',
+        'properties': {
+            'queryparams': {
+                'type': 'object',
+                'patternProperties': {
+                    '^.*$': {
+                        'oneOf': [
+                            {'$ref': '#/definitions/boolean'},
+                            {'$ref': '#/definitions/number'},
+                            {'$ref': '#/definitions/string'},
+                        ],
+                    },
+                },
+            },
+        },
+        'required': ['queryparams'],
+        'definitions': {
+            'boolean': {'type': 'boolean'},
+            'number': {'type': 'number'},
+            'string': {'type': 'string'},
+        },
+    }
+
+    def __init__(self, params):
+        super(QueryParamsTestParameter, self).__init__()
+        self.params = params
+        self.name = 'params'
+
+    @classmethod
+    def from_dict(cls, data):
+        try:
+            jsonschema.validate(data, cls._schema)
+        except ValidationError as e:
+            raise YamlParseError(str(e))
+        return cls(params=data['queryparams'])
+
+    @contextmanager
+    def load(self, config):
+        yield {self.name: self.params}
