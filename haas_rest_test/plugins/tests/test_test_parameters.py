@@ -240,7 +240,6 @@ class TestBodyTestParameterMultipart(unittest.TestCase):
                 'value': 'some text',
             },
             'file': {
-                'Content-Type': 'application/zip',
                 'filename': 'some-file.zip',
             },
         }
@@ -272,47 +271,11 @@ class TestBodyTestParameterMultipart(unittest.TestCase):
         with self.assertRaises(YamlParseError):
             BodyTestParameter.from_dict(spec)
 
-    def test_create_multipart_loader_missing_filename(self):
-        # Given
-        multipart_body = {
-            'file': {
-                'Content-Type': 'application/zip',
-            },
-        }
-        spec = {
-            'body': {
-                'format': 'multipart',
-                'value': multipart_body,
-            },
-        }
-
-        # When/Then (no validation error occurs)
-        with self.assertRaises(YamlParseError):
-            BodyTestParameter.from_dict(spec)
-
     def test_create_multipart_loader_missing_form_content_type(self):
         # Given
         multipart_body = {
             'data': {
                 'value': 'some text',
-            },
-        }
-        spec = {
-            'body': {
-                'format': 'multipart',
-                'value': multipart_body,
-            },
-        }
-
-        # When/Then (no validation error occurs)
-        with self.assertRaises(YamlParseError):
-            BodyTestParameter.from_dict(spec)
-
-    def test_create_multipart_loader_missing_filename_content_type(self):
-        # Given
-        multipart_body = {
-            'file': {
-                'filename': 'some-file.txt',
             },
         }
         spec = {

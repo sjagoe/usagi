@@ -186,14 +186,11 @@ class BodyTestParameter(ITestParameter):
                 'file': {
                     'description': 'Definition for a file field in a multipart/from-data upload',  # noqa
                     'properties': {
-                        'Content-Type': {
-                            'type': 'string',
-                        },
                         'filename': {
                             'type': 'string',
                         },
                     },
-                    'required': ['Content-Type', 'filename'],
+                    'required': ['filename'],
                 },
             },
         },
