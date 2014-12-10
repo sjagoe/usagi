@@ -273,6 +273,67 @@ class TestSchema(unittest.TestCase):
 
         test_data = yaml.safe_load(test_yaml)
 
+        # Validation fails
+        with self.assertRaises(ValidationError):
+            jsonschema.validate(test_data, SCHEMA)
+
+    def test_schema_pre_definitions_case_setup(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+          version: '1.0'
+
+          config:
+            host: test.domain
+
+          test-pre-definitions:
+            some_tests:
+              - name: "Root"
+                url: "/"
+            more_tests:
+              - name: "Post-1"
+                url: "/one"
+              - name: "Post-2"
+                url: "/two"
+
+          cases:
+            - name: "Basic"
+              case-setup:
+                - some_tests
+              case-teardown:
+                - more_tests
+              tests:
+                - name: "Another URL"
+                  url: "/another"
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
         # Validation succeeds
+        jsonschema.validate(test_data, SCHEMA)
+
+    def test_schema_bad_pre_definition(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+          version: '1.0'
+
+          config:
+            host: test.domain
+
+          test-pre-definitions:
+            - name: "Root"
+              url: "/"
+
+          cases:
+            - name: "Basic"
+              tests:
+                - name: "Another URL"
+                  url: "/another"
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # Validation fails
         with self.assertRaises(ValidationError):
             jsonschema.validate(test_data, SCHEMA)
