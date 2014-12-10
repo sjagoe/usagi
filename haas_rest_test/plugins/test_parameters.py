@@ -114,7 +114,7 @@ class BodyTestParameter(ITestParameter):
         'properties': {
             'body': {
                 'type': 'object',
-                'parameters': {
+                'properties': {
                     'format': {
                         'enum': [_format_none, _format_plain, _format_json,
                                  _format_yaml, _format_multipart],
