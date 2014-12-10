@@ -147,6 +147,58 @@ class BodyTestParameter(ITestParameter):
         },
     }
 
+    _format_schemas = {
+        _format_multipart: {
+            '$schema': 'http://json-schema.org/draft-04/schema#',
+            'title': 'A multipart/form-data definition',
+            'description': 'Test case markup for Haas Rest Test',
+            'type': 'object',
+            'patternProperties': {
+                '^.*$': {
+                    'oneOf': [
+                        {'$ref': '#/definitions/form-data'},
+                        {'$ref': '#/definitions/file'},
+                    ],
+                },
+            },
+            'definitions': {
+                'str': {
+                    'type': 'string',
+                },
+                'obj': {
+                    'type': 'object',
+                },
+                'form-data': {
+                    'description': 'Definition for form fields in a multipart/from-data upload',  # noqa
+                    'properties': {
+                        'Content-Type': {
+                            'type': 'string',
+                        },
+                        'value': {
+                            'oneOf': [
+                                {'$ref': '#/definitions/obj'},
+                                {'$ref': '#/definitions/str'},
+                            ],
+                        },
+                    },
+                    'required': ['Content-Type', 'value'],
+                },
+                'file': {
+                    'description': 'Definition for a file field in a multipart/from-data upload',  # noqa
+                    'properties': {
+                        'Content-Type': {
+                            'type': 'string',
+                        },
+                        'filename': {
+                            'type': 'string',
+                        },
+                    },
+                    'required': ['Content-Type', 'filename'],
+                },
+            },
+        },
+    }
+
     def __init__(self, format, lookup_var, value):
         super(BodyTestParameter, self).__init__()
         self._format = format
@@ -162,6 +214,13 @@ class BodyTestParameter(ITestParameter):
         body = data['body']
         format = body.get('format', cls._format_none)
         value = body['value']
+
+        format_schema = cls._format_schemas.get(format)
+        if format_schema is not None:
+            try:
+                jsonschema.validate(value, format_schema)
+            except ValidationError as e:
+                raise YamlParseError(str(e))
 
         return cls(
             format=format,

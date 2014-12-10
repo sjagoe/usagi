@@ -228,3 +228,100 @@ class TestBodyTestParameter(unittest.TestCase):
         with parameter.load(config) as loaded:
             # Then
             self.assertEqual(loaded, expected)
+
+
+class TestBodyTestParameterMultipart(unittest.TestCase):
+
+    def test_create_multipart_body_loader(self):
+        # Given
+        multipart_body = {
+            'data': {
+                'Content-Type': 'text/plain',
+                'value': 'some text',
+            },
+            'file': {
+                'Content-Type': 'application/zip',
+                'filename': 'some-file.zip',
+            },
+        }
+        spec = {
+            'body': {
+                'format': 'multipart',
+                'value': multipart_body,
+            },
+        }
+
+        # When/Then (no validation error occurs)
+        BodyTestParameter.from_dict(spec)
+
+    def test_create_multipart_loader_missing_value(self):
+        # Given
+        multipart_body = {
+            'data': {
+                'Content-Type': 'text/plain',
+            },
+        }
+        spec = {
+            'body': {
+                'format': 'multipart',
+                'value': multipart_body,
+            },
+        }
+
+        # When/Then
+        with self.assertRaises(YamlParseError):
+            BodyTestParameter.from_dict(spec)
+
+    def test_create_multipart_loader_missing_filename(self):
+        # Given
+        multipart_body = {
+            'file': {
+                'Content-Type': 'application/zip',
+            },
+        }
+        spec = {
+            'body': {
+                'format': 'multipart',
+                'value': multipart_body,
+            },
+        }
+
+        # When/Then (no validation error occurs)
+        with self.assertRaises(YamlParseError):
+            BodyTestParameter.from_dict(spec)
+
+    def test_create_multipart_loader_missing_form_content_type(self):
+        # Given
+        multipart_body = {
+            'data': {
+                'value': 'some text',
+            },
+        }
+        spec = {
+            'body': {
+                'format': 'multipart',
+                'value': multipart_body,
+            },
+        }
+
+        # When/Then (no validation error occurs)
+        with self.assertRaises(YamlParseError):
+            BodyTestParameter.from_dict(spec)
+
+    def test_create_multipart_loader_missing_filename_content_type(self):
+        # Given
+        multipart_body = {
+            'file': {
+                'filename': 'some-file.txt',
+            },
+        }
+        spec = {
+            'body': {
+                'format': 'multipart',
+                'value': multipart_body,
+            },
+        }
+
+        # When/Then (no validation error occurs)
+        with self.assertRaises(YamlParseError):
+            BodyTestParameter.from_dict(spec)
