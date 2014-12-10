@@ -11,12 +11,13 @@ from .var_loader import VarLoader
 
 class Config(object):
 
-    def __init__(self, scheme, host, variables, var_loader):
+    def __init__(self, scheme, host, variables, var_loader, test_filename):
         super(Config, self).__init__()
         self.var_loader = var_loader
         self.scheme = scheme
         self.variables = variables
         self.host = self.load_variable('host', host)
+        self.test_filename = test_filename
 
     @classmethod
     def from_dict(cls, config, test_filename):
@@ -27,6 +28,7 @@ class Config(object):
             host=config['host'],
             variables=variables,
             var_loader=var_loader,
+            test_filename=test_filename,
         )
 
     def load_variable(self, name, var):

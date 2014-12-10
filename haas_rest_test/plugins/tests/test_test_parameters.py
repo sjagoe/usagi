@@ -6,6 +6,9 @@
 # of the 3-clause BSD license.  See the LICENSE.txt file for details.
 from __future__ import absolute_import, unicode_literals
 
+import os
+import shutil
+import tempfile
 import textwrap
 
 from haas.testing import unittest
@@ -331,3 +334,53 @@ class TestBodyTestParameterMultipart(unittest.TestCase):
             self.assertEqual(name, '')
             self.assertEqual(content.read().decode('utf-8'), expected2)
             self.assertEqual(type_, 'application/json; charset=UTF-8')
+
+
+class TestBodyTestParameterMultipartFile(unittest.TestCase):
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+        self.test_filename = os.path.join(self.temp_dir, 'test.yml')
+        self.absolute_filename = filename = os.path.join(
+            self.temp_dir, 'file.txt')
+        self.relative_filename = 'file.txt'
+        with open(filename, 'w'):
+            pass
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+
+    def test_create_multipart_file(self):
+        # Given
+        config = Config.from_dict({'host': 'name.domain'}, self.test_filename)
+        multipart_body = {
+            'field1': {
+                'filename': self.absolute_filename,
+            },
+            'field2': {
+                'filename': self.relative_filename,
+            },
+        }
+        spec = {
+            'body': {
+                'format': 'multipart',
+                'value': multipart_body,
+            },
+        }
+
+        loader = BodyTestParameter.from_dict(spec)
+
+        # When
+        with loader.load(config) as loaded:
+            # Then
+            self.assertIn('data', loaded)
+            self.assertNotIn('headers', loaded)
+            data = loaded['data']
+            self.assertIn('field1', data)
+            self.assertIn('field2', data)
+
+            fh1 = data['field1']
+            self.assertEqual(fh1.name, self.absolute_filename)
+
+            fh2 = data['field2']
+            self.assertEqual(fh2.name, self.absolute_filename)

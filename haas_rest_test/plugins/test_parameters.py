@@ -15,7 +15,7 @@ import jsonschema
 import six
 import yaml
 
-from haas_rest_test.utils import ExitStack
+from haas_rest_test.utils import ExitStack, get_file_path
 from ..exceptions import YamlParseError
 from .i_test_parameter import ITestParameter
 
@@ -274,7 +274,9 @@ class BodyTestParameter(ITestParameter):
 
         with ExitStack() as stack:
             for name, data in file_fields:
-                fh = stack.enter_context(open(data['filename'], 'rb'))
+                file_path = get_file_path(
+                    data['filename'], config.test_filename)
+                fh = stack.enter_context(open(file_path, 'rb'))
                 fields[name] = fh
             yield fields
 
