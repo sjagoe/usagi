@@ -25,10 +25,9 @@ class TestMethodTestParameter(unittest.TestCase):
         parameter = MethodTestParameter.from_dict(spec)
 
         # When
-        loaded = parameter.load(config)
-
-        # Then
-        self.assertEqual(loaded, spec)
+        with parameter.load(config) as loaded:
+            # Then
+            self.assertEqual(loaded, spec)
 
     def test_invalid_method(self):
         # Given
@@ -56,10 +55,9 @@ class TestHeadersTestParameter(unittest.TestCase):
         parameter = HeadersTestParameter.from_dict(spec)
 
         # When
-        loaded = parameter.load(config)
-
-        # Then
-        self.assertEqual(loaded, spec)
+        with parameter.load(config) as loaded:
+            # Then
+            self.assertEqual(loaded, spec)
 
     def test_load_variable(self):
         # Given
@@ -82,11 +80,10 @@ class TestHeadersTestParameter(unittest.TestCase):
         parameter = HeadersTestParameter.from_dict(spec)
         expected = {'headers': {'Content-Type': 'application/json'}}
 
-        # When/Then
-        loaded = parameter.load(config)
-
-        # Then
-        self.assertEqual(loaded, expected)
+        # When
+        with parameter.load(config) as loaded:
+            # Then
+            self.assertEqual(loaded, expected)
 
     def test_load_missing_variable(self):
         # Given
@@ -103,7 +100,8 @@ class TestHeadersTestParameter(unittest.TestCase):
 
         # When/Then
         with self.assertRaises(InvalidVariable):
-            parameter.load(config)
+            with parameter.load(config):
+                pass
 
 
 class TestBodyTestParameter(unittest.TestCase):
@@ -133,10 +131,9 @@ class TestBodyTestParameter(unittest.TestCase):
         }
 
         # When
-        loaded = parameter.load(config)
-
-        # Then
-        self.assertEqual(loaded, expected)
+        with parameter.load(config) as loaded:
+            # Then
+            self.assertEqual(loaded, expected)
 
     def test_body_yaml(self):
         # Given
@@ -161,10 +158,9 @@ class TestBodyTestParameter(unittest.TestCase):
         }
 
         # When
-        loaded = parameter.load(config)
-
-        # Then
-        self.assertEqual(loaded, expected)
+        with parameter.load(config) as loaded:
+            # Then
+            self.assertEqual(loaded, expected)
 
     def test_body_plain(self):
         # Given
@@ -182,10 +178,9 @@ class TestBodyTestParameter(unittest.TestCase):
         }
 
         # When
-        loaded = parameter.load(config)
-
-        # Then
-        self.assertEqual(loaded, expected)
+        with parameter.load(config) as loaded:
+            # Then
+            self.assertEqual(loaded, expected)
 
     def test_body_format_none(self):
         # Given
@@ -203,10 +198,9 @@ class TestBodyTestParameter(unittest.TestCase):
         }
 
         # When
-        loaded = parameter.load(config)
-
-        # Then
-        self.assertEqual(loaded, expected)
+        with parameter.load(config) as loaded:
+            # Then
+            self.assertEqual(loaded, expected)
 
     def test_body_from_var(self):
         # Given
@@ -231,7 +225,6 @@ class TestBodyTestParameter(unittest.TestCase):
         }
 
         # When
-        loaded = parameter.load(config)
-
-        # Then
-        self.assertEqual(loaded, expected)
+        with parameter.load(config) as loaded:
+            # Then
+            self.assertEqual(loaded, expected)

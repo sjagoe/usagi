@@ -6,6 +6,7 @@
 # of the 3-clause BSD license.  See the LICENSE.txt file for details.
 from __future__ import absolute_import, unicode_literals
 
+from contextlib import contextmanager
 import json
 
 from jsonschema.exceptions import ValidationError
@@ -44,8 +45,9 @@ class MethodTestParameter(ITestParameter):
             raise YamlParseError(str(e))
         return cls(method=data['method'])
 
+    @contextmanager
     def load(self, config):
-        return {self.name: self.method}
+        yield {self.name: self.method}
 
 
 class HeadersTestParameter(ITestParameter):
@@ -76,12 +78,13 @@ class HeadersTestParameter(ITestParameter):
             raise YamlParseError(str(e))
         return cls(headers=data['headers'])
 
+    @contextmanager
     def load(self, config):
         headers = dict(
             (header_name, config.load_variable(header_name, header_value))
             for header_name, header_value in self.headers.items()
         )
-        return {self.name: headers}
+        yield {self.name: headers}
 
 
 class BodyTestParameter(ITestParameter):
@@ -164,6 +167,7 @@ class BodyTestParameter(ITestParameter):
             value=body['value'],
         )
 
+    @contextmanager
     def load(self, config):
         result = {}
         format = self._format
@@ -180,4 +184,4 @@ class BodyTestParameter(ITestParameter):
 
         result['data'] = value
 
-        return result
+        yield result

@@ -23,14 +23,17 @@ class ITestParameter(object):
     """
 
     @abstractclassmethod
-    def from_dict(cls):
+    def from_dict(cls, data):
         """Create the TestParameter from a dictionary.
 
         """
 
     @abc.abstractmethod
     def load(self, config):
-        """Load and return the options to pass to
+        """Context manager to load and return the options to pass to
         ``requests.Session.request()``.
+
+        On context cleanup, this context manager is expected to release
+        any resources helf during the HTTP request.
 
         """
