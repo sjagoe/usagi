@@ -93,9 +93,8 @@ class BodyTestParameter(ITestParameter):
     _format_plain = 'plain'
     _format_json = 'json'
     _format_yaml = 'yaml'
+    _format_multipart = 'multipart'
     _format_handlers = {
-        _format_none: lambda d: d,
-        _format_plain: lambda d: d,
         _format_json: json.dumps,
         _format_yaml: lambda d: yaml.safe_dump(
             d, default_flow_style=False)
@@ -118,7 +117,7 @@ class BodyTestParameter(ITestParameter):
                 'parameters': {
                     'format': {
                         'enum': [_format_none, _format_plain, _format_json,
-                                 _format_yaml],
+                                 _format_yaml, _format_multipart],
                         'default': _format_none,
                     },
                     'lookup-var': {
@@ -161,27 +160,39 @@ class BodyTestParameter(ITestParameter):
         except ValidationError as e:
             raise YamlParseError(str(e))
         body = data['body']
+        format = body.get('format', cls._format_none)
+        value = body['value']
+
         return cls(
-            format=body.get('format', cls._format_none),
+            format=format,
             lookup_var=body.get('lookup-var', True),
-            value=body['value'],
+            value=value,
         )
+
+    @property
+    def _format_handler(self):
+        default = lambda d: d
+        return self._format_handlers.get(self._format, default)
+
+    @property
+    def _content_type(self):
+        return self._format_content_types.get(self._format)
+
+    def _get_value(self, config):
+        value = self._value
+        if self._lookup_var:
+            value = config.load_variable('value', value)
+        return self._format_handler(value)
 
     @contextmanager
     def load(self, config):
         result = {}
-        format = self._format
 
-        header = self._format_content_types.get(format)
-        if header is not None:
+        content_type = self._content_type
+        if content_type is not None:
             headers = result['headers'] = {}
-            headers['Content-Type'] = header
+            headers['Content-Type'] = content_type
 
-        value = self._value
-        if self._lookup_var:
-            value = config.load_variable('value', value)
-        value = self._format_handlers[format](value)
-
-        result['data'] = value
+        result['data'] = self._get_value(config)
 
         yield result
