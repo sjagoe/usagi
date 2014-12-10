@@ -288,3 +288,46 @@ class TestBodyTestParameterMultipart(unittest.TestCase):
         # When/Then (no validation error occurs)
         with self.assertRaises(YamlParseError):
             BodyTestParameter.from_dict(spec)
+
+    def test_create_multipart_form_data(self):
+        # Given
+        config = Config.from_dict({'host': 'name.domain'}, __file__)
+        expected1 = 'some text'
+        expected2 = '{}'
+        multipart_body = {
+            'field1': {
+                'Content-Type': 'text/plain',
+                'value': expected1,
+            },
+            'field2': {
+                'Content-Type': 'application/json',
+                'value': expected2,
+            },
+        }
+        spec = {
+            'body': {
+                'format': 'multipart',
+                'value': multipart_body,
+            },
+        }
+
+        loader = BodyTestParameter.from_dict(spec)
+
+        # When
+        with loader.load(config) as loaded:
+            # Then
+            self.assertIn('data', loaded)
+            self.assertNotIn('headers', loaded)
+            data = loaded['data']
+            self.assertIn('field1', data)
+            self.assertIn('field2', data)
+
+            name, content, type_ = data['field1']
+            self.assertEqual(name, '')
+            self.assertEqual(content.read().decode('utf-8'), expected1)
+            self.assertEqual(type_, 'text/plain; charset=UTF-8')
+
+            name, content, type_ = data['field2']
+            self.assertEqual(name, '')
+            self.assertEqual(content.read().decode('utf-8'), expected2)
+            self.assertEqual(type_, 'application/json; charset=UTF-8')

@@ -10,9 +10,12 @@ from contextlib import contextmanager
 import json
 
 from jsonschema.exceptions import ValidationError
+from six import BytesIO
 import jsonschema
+import six
 import yaml
 
+from haas_rest_test.utils import ExitStack
 from ..exceptions import YamlParseError
 from .i_test_parameter import ITestParameter
 
@@ -174,6 +177,10 @@ class BodyTestParameter(ITestParameter):
                         'Content-Type': {
                             'type': 'string',
                         },
+                        'charset': {
+                            'type': 'string',
+                            'description': 'Encoding to use for value.  Default UTF-8',  # noqa
+                        },
                         'value': {
                             'oneOf': [
                                 {'$ref': '#/definitions/obj'},
@@ -241,11 +248,43 @@ class BodyTestParameter(ITestParameter):
         return self._format_handler(value)
 
     @contextmanager
+    def _multipart_value(self, config):
+        is_file = lambda value: 'filename' in value
+        file_fields = [(name, value) for name, value in self._value.items()
+                       if is_file(value)]
+        form_fields = [(name, value) for name, value in self._value.items()
+                       if not is_file(value)]
+
+        if self._lookup_var:
+            load_variable = lambda n, v: config.load_variable(n, v)
+        else:
+            load_variable = lambda n, v: v
+
+        fields = {}
+        for name, data in form_fields:
+            value = load_variable(name, data['value'])
+            charset = data.get('charset', 'UTF-8')
+            if isinstance(value, six.text_type):
+                value = value.encode(charset)
+
+            content_type = '{0}; charset={1}'.format(
+                data['Content-Type'], charset)
+
+            fields[name] = ('', BytesIO(value), content_type)
+
+        with ExitStack() as stack:
+            for name, data in file_fields:
+                fh = stack.enter_context(open(data['filename'], 'rb'))
+                fields[name] = fh
+            yield fields
+
+    @contextmanager
     def _get_value(self, config):
         if self._format != self._format_multipart:
             yield self._basic_value(config)
         else:
-            raise NotImplementedError()
+            with self._multipart_value(config) as value:
+                yield value
 
     @contextmanager
     def load(self, config):
