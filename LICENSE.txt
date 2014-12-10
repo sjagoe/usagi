@@ -1,4 +1,4 @@
-Copyright (c) 2014, Simon Jagoe
+Copyright (c) 2014, Simon Jagoe and Enthought Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
