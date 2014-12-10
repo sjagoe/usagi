@@ -237,11 +237,18 @@ class BodyTestParameter(ITestParameter):
     def _content_type(self):
         return self._format_content_types.get(self._format)
 
-    def _get_value(self, config):
+    def _basic_value(self, config):
         value = self._value
         if self._lookup_var:
             value = config.load_variable('value', value)
         return self._format_handler(value)
+
+    @contextmanager
+    def _get_value(self, config):
+        if self._format != self._format_multipart:
+            yield self._basic_value(config)
+        else:
+            raise NotImplementedError()
 
     @contextmanager
     def load(self, config):
@@ -252,6 +259,6 @@ class BodyTestParameter(ITestParameter):
             headers = result['headers'] = {}
             headers['Content-Type'] = content_type
 
-        result['data'] = self._get_value(config)
-
-        yield result
+        with self._get_value(config) as value:
+            result['data'] = value
+            yield result
