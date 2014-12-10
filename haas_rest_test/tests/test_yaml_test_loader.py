@@ -239,3 +239,80 @@ class TestYamlTestLoader(unittest.TestCase):
         # Then
         self.assertEqual(case_str, "'Basic:Test root URL' (/path/to/foo.yaml)")
         self.assertIsNone(description)
+
+    @responses.activate
+    def test_case_setup(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+          version: '1.0'
+
+          config:
+            host: test.domain
+
+          test-pre-definitions:
+            some_tests:
+              - name: "Root"
+                url: "/"
+            more_tests:
+              - name: "Post-1"
+                url: "/one"
+              - name: "Post-2"
+                url: "/two"
+
+          cases:
+            - name: "Basic"
+              case-setup:
+                - some_tests
+              case-teardown:
+                - more_tests
+              tests:
+                - name: "Another URL"
+                  url: "/another"
+
+        """)
+
+        responses.add(
+            responses.GET,
+            'http://test.domain/',
+            status=200,
+        )
+        responses.add(
+            responses.GET,
+            'http://test.domain/another',
+            status=201,
+        )
+        responses.add(
+            responses.GET,
+            'http://test.domain/one',
+            status=202,
+        )
+        responses.add(
+            responses.GET,
+            'http://test.domain/two',
+            status=203,
+        )
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # When
+        suite = self.loader.load_tests_from_yaml(
+            test_data, '/path/to/foo.yaml')
+
+        # Then
+        self.assertIsInstance(suite, TestSuite)
+        self.assertEqual(suite.countTestCases(), 4)
+
+        # When
+        result = ResultCollecter()
+        suite(result)
+
+        # Then
+        self.assertEqual(len(responses.calls), 4)
+        self.assertTrue(result.wasSuccessful())
+
+        pre, test, post_1, post_2 = responses.calls
+
+        self.assertEqual(pre.request.url, 'http://test.domain/')
+        self.assertEqual(test.request.url, 'http://test.domain/another')
+        self.assertEqual(post_1.request.url, 'http://test.domain/one')
+        self.assertEqual(post_2.request.url, 'http://test.domain/two')

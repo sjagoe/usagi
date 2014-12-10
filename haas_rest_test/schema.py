@@ -34,6 +34,16 @@ SCHEMA = {
             },
             'required': ['host'],
         },
+        'test-pre-definitions': {
+            'type': 'object',
+            'patternProperties': {
+                '^.*$': {
+                    'type': 'array',
+                    'items': {'$ref': '#/definitions/test'},
+                    'minItems': 1,
+                },
+            },
+        },
         'cases': {
             'type': 'array',
             'items': {'$ref': '#/definitions/case'},
@@ -86,6 +96,20 @@ SCHEMA = {
             'properties': {
                 'name': {
                     '$ref': '#/definitions/name',
+                },
+                'case-setup': {
+                    'description': 'References to items in test-pre-definitions that will run before any tests defined in this case',  # noqa
+                    'type': 'array',
+                    'items': {
+                        'type': 'string',
+                    },
+                },
+                'case-teardown': {
+                    'description': 'References to items in test-pre-definitions that will run after all tests defined in this case',  # noqa
+                    'type': 'array',
+                    'items': {
+                        'type': 'string',
+                    },
                 },
                 'tests': {
                     'type': 'array',
