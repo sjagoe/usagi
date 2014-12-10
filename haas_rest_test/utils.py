@@ -6,6 +6,7 @@
 # of the 3-clause BSD license.  See the LICENSE.txt file for details.
 from __future__ import absolute_import, unicode_literals
 
+import os
 import sys
 
 from requests.utils import default_user_agent as requests_user_agent
@@ -23,6 +24,17 @@ def create_session():
     session = requests.Session()
     session.headers['User-Agent'] = haas_rest_test_user_agent()
     return session
+
+
+def get_file_path(filename, test_filename):
+    if not os.path.isabs(filename):
+        filename = os.path.join(
+            os.path.dirname(os.path.abspath(test_filename)),
+            filename,
+        )
+    else:
+        filename = filename
+    return os.path.normcase(os.path.abspath(filename))
 
 
 if sys.version_info >= (3, 3):  # pragma: no cover

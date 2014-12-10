@@ -10,9 +10,12 @@ from contextlib import contextmanager
 import json
 
 from jsonschema.exceptions import ValidationError
+from six import BytesIO
 import jsonschema
+import six
 import yaml
 
+from haas_rest_test.utils import ExitStack, get_file_path
 from ..exceptions import YamlParseError
 from .i_test_parameter import ITestParameter
 
@@ -93,9 +96,8 @@ class BodyTestParameter(ITestParameter):
     _format_plain = 'plain'
     _format_json = 'json'
     _format_yaml = 'yaml'
+    _format_multipart = 'multipart'
     _format_handlers = {
-        _format_none: lambda d: d,
-        _format_plain: lambda d: d,
         _format_json: json.dumps,
         _format_yaml: lambda d: yaml.safe_dump(
             d, default_flow_style=False)
@@ -115,10 +117,10 @@ class BodyTestParameter(ITestParameter):
         'properties': {
             'body': {
                 'type': 'object',
-                'parameters': {
+                'properties': {
                     'format': {
                         'enum': [_format_none, _format_plain, _format_json,
-                                 _format_yaml],
+                                 _format_yaml, _format_multipart],
                         'default': _format_none,
                     },
                     'lookup-var': {
@@ -148,6 +150,59 @@ class BodyTestParameter(ITestParameter):
         },
     }
 
+    _format_schemas = {
+        _format_multipart: {
+            '$schema': 'http://json-schema.org/draft-04/schema#',
+            'title': 'A multipart/form-data definition',
+            'description': 'Test case markup for Haas Rest Test',
+            'type': 'object',
+            'patternProperties': {
+                '^.*$': {
+                    'oneOf': [
+                        {'$ref': '#/definitions/form-data'},
+                        {'$ref': '#/definitions/file'},
+                    ],
+                },
+            },
+            'definitions': {
+                'str': {
+                    'type': 'string',
+                },
+                'obj': {
+                    'type': 'object',
+                },
+                'form-data': {
+                    'description': 'Definition for form fields in a multipart/from-data upload',  # noqa
+                    'properties': {
+                        'Content-Type': {
+                            'type': 'string',
+                        },
+                        'charset': {
+                            'type': 'string',
+                            'description': 'Encoding to use for value.  Default UTF-8',  # noqa
+                        },
+                        'value': {
+                            'oneOf': [
+                                {'$ref': '#/definitions/obj'},
+                                {'$ref': '#/definitions/str'},
+                            ],
+                        },
+                    },
+                    'required': ['Content-Type', 'value'],
+                },
+                'file': {
+                    'description': 'Definition for a file field in a multipart/from-data upload',  # noqa
+                    'properties': {
+                        'filename': {
+                            'type': 'string',
+                        },
+                    },
+                    'required': ['filename'],
+                },
+            },
+        },
+    }
+
     def __init__(self, format, lookup_var, value):
         super(BodyTestParameter, self).__init__()
         self._format = format
@@ -161,27 +216,87 @@ class BodyTestParameter(ITestParameter):
         except ValidationError as e:
             raise YamlParseError(str(e))
         body = data['body']
+        format = body.get('format', cls._format_none)
+        value = body['value']
+
+        format_schema = cls._format_schemas.get(format)
+        if format_schema is not None:
+            try:
+                jsonschema.validate(value, format_schema)
+            except ValidationError as e:
+                raise YamlParseError(str(e))
+
         return cls(
-            format=body.get('format', cls._format_none),
+            format=format,
             lookup_var=body.get('lookup-var', True),
-            value=body['value'],
+            value=value,
         )
+
+    @property
+    def _format_handler(self):
+        default = lambda d: d
+        return self._format_handlers.get(self._format, default)
+
+    @property
+    def _content_type(self):
+        return self._format_content_types.get(self._format)
+
+    def _basic_value(self, config):
+        value = self._value
+        if self._lookup_var:
+            value = config.load_variable('value', value)
+        return {'data': self._format_handler(value)}
+
+    @contextmanager
+    def _multipart_value(self, config):
+        is_file = lambda value: 'filename' in value
+        file_fields = [(name, value) for name, value in self._value.items()
+                       if is_file(value)]
+        form_fields = [(name, value) for name, value in self._value.items()
+                       if not is_file(value)]
+
+        if self._lookup_var:
+            load_variable = lambda n, v: config.load_variable(n, v)
+        else:
+            load_variable = lambda n, v: v
+
+        fields = {}
+        for name, data in form_fields:
+            value = load_variable(name, data['value'])
+            charset = data.get('charset', 'UTF-8')
+            if isinstance(value, six.text_type):
+                value = value.encode(charset)
+
+            content_type = '{0}; charset={1}'.format(
+                data['Content-Type'], charset)
+
+            fields[name] = ('', BytesIO(value), content_type)
+
+        with ExitStack() as stack:
+            for name, data in file_fields:
+                file_path = get_file_path(
+                    data['filename'], config.test_filename)
+                fh = stack.enter_context(open(file_path, 'rb'))
+                fields[name] = fh
+            yield {'files': fields}
+
+    @contextmanager
+    def _get_value(self, config):
+        if self._format != self._format_multipart:
+            yield self._basic_value(config)
+        else:
+            with self._multipart_value(config) as value:
+                yield value
 
     @contextmanager
     def load(self, config):
         result = {}
-        format = self._format
 
-        header = self._format_content_types.get(format)
-        if header is not None:
+        content_type = self._content_type
+        if content_type is not None:
             headers = result['headers'] = {}
-            headers['Content-Type'] = header
+            headers['Content-Type'] = content_type
 
-        value = self._value
-        if self._lookup_var:
-            value = config.load_variable('value', value)
-        value = self._format_handlers[format](value)
-
-        result['data'] = value
-
-        yield result
+        with self._get_value(config) as value:
+            result.update(value)
+            yield result

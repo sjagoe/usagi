@@ -13,6 +13,7 @@ from jsonschema.exceptions import ValidationError
 import jsonschema
 import yaml
 
+from haas_rest_test.utils import get_file_path
 from ..exceptions import InvalidVariable, YamlParseError
 from .i_var_loader import IVarLoader
 
@@ -183,19 +184,9 @@ class FileVarLoader(IVarLoader):
             strip=var_dict.get('strip', True),
         )
 
-    def _get_file_path(self, test_filename):
-        if not os.path.isabs(self._filename):
-            filename = os.path.join(
-                os.path.dirname(os.path.abspath(test_filename)),
-                self._filename,
-            )
-        else:
-            filename = self._filename
-        return os.path.normcase(os.path.abspath(filename))
-
     def load(self, filename, variables):
         if not self._is_loaded:
-            file_path = self._get_file_path(filename)
+            file_path = get_file_path(self._filename, filename)
             try:
                 with open(file_path) as fh:
                     data = fh.read()

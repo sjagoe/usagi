@@ -6,6 +6,9 @@
 # of the 3-clause BSD license.  See the LICENSE.txt file for details.
 from __future__ import absolute_import, unicode_literals
 
+import os
+import shutil
+import tempfile
 import textwrap
 
 from haas.testing import unittest
@@ -228,3 +231,156 @@ class TestBodyTestParameter(unittest.TestCase):
         with parameter.load(config) as loaded:
             # Then
             self.assertEqual(loaded, expected)
+
+
+class TestBodyTestParameterMultipart(unittest.TestCase):
+
+    def test_create_multipart_body_loader(self):
+        # Given
+        multipart_body = {
+            'data': {
+                'Content-Type': 'text/plain',
+                'value': 'some text',
+            },
+            'file': {
+                'filename': 'some-file.zip',
+            },
+        }
+        spec = {
+            'body': {
+                'format': 'multipart',
+                'value': multipart_body,
+            },
+        }
+
+        # When/Then (no validation error occurs)
+        BodyTestParameter.from_dict(spec)
+
+    def test_create_multipart_loader_missing_value(self):
+        # Given
+        multipart_body = {
+            'data': {
+                'Content-Type': 'text/plain',
+            },
+        }
+        spec = {
+            'body': {
+                'format': 'multipart',
+                'value': multipart_body,
+            },
+        }
+
+        # When/Then
+        with self.assertRaises(YamlParseError):
+            BodyTestParameter.from_dict(spec)
+
+    def test_create_multipart_loader_missing_form_content_type(self):
+        # Given
+        multipart_body = {
+            'data': {
+                'value': 'some text',
+            },
+        }
+        spec = {
+            'body': {
+                'format': 'multipart',
+                'value': multipart_body,
+            },
+        }
+
+        # When/Then (no validation error occurs)
+        with self.assertRaises(YamlParseError):
+            BodyTestParameter.from_dict(spec)
+
+    def test_create_multipart_form_data(self):
+        # Given
+        config = Config.from_dict({'host': 'name.domain'}, __file__)
+        expected1 = 'some text'
+        expected2 = '{}'
+        multipart_body = {
+            'field1': {
+                'Content-Type': 'text/plain',
+                'value': expected1,
+            },
+            'field2': {
+                'Content-Type': 'application/json',
+                'value': expected2,
+            },
+        }
+        spec = {
+            'body': {
+                'format': 'multipart',
+                'value': multipart_body,
+            },
+        }
+
+        loader = BodyTestParameter.from_dict(spec)
+
+        # When
+        with loader.load(config) as loaded:
+            # Then
+            self.assertIn('files', loaded)
+            self.assertNotIn('headers', loaded)
+            data = loaded['files']
+            self.assertIn('field1', data)
+            self.assertIn('field2', data)
+
+            name, content, type_ = data['field1']
+            self.assertEqual(name, '')
+            self.assertEqual(content.read().decode('utf-8'), expected1)
+            self.assertEqual(type_, 'text/plain; charset=UTF-8')
+
+            name, content, type_ = data['field2']
+            self.assertEqual(name, '')
+            self.assertEqual(content.read().decode('utf-8'), expected2)
+            self.assertEqual(type_, 'application/json; charset=UTF-8')
+
+
+class TestBodyTestParameterMultipartFile(unittest.TestCase):
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+        self.test_filename = os.path.join(self.temp_dir, 'test.yml')
+        self.absolute_filename = filename = os.path.join(
+            self.temp_dir, 'file.txt')
+        self.relative_filename = 'file.txt'
+        with open(filename, 'w'):
+            pass
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+
+    def test_create_multipart_file(self):
+        # Given
+        config = Config.from_dict({'host': 'name.domain'}, self.test_filename)
+        multipart_body = {
+            'field1': {
+                'filename': self.absolute_filename,
+            },
+            'field2': {
+                'filename': self.relative_filename,
+            },
+        }
+        spec = {
+            'body': {
+                'format': 'multipart',
+                'value': multipart_body,
+            },
+        }
+
+        loader = BodyTestParameter.from_dict(spec)
+
+        # When
+        with loader.load(config) as loaded:
+            # Then
+            self.assertIn('files', loaded)
+            self.assertNotIn('headers', loaded)
+            data = loaded['files']
+            self.assertIn('field1', data)
+            self.assertIn('field2', data)
+
+            fh1 = data['field1']
+            self.assertEqual(fh1.name, self.absolute_filename)
+
+            fh2 = data['field2']
+            self.assertEqual(fh2.name, self.absolute_filename)
