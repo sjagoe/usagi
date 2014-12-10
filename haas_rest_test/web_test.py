@@ -6,12 +6,14 @@
 # of the 3-clause BSD license.  See the LICENSE.txt file for details.
 from __future__ import absolute_import, unicode_literals
 
+from contextlib import contextmanager
+
 from requests.exceptions import ConnectionError
 from six.moves import urllib
 
 from .exceptions import (
     InvalidAssertionClass, InvalidParameterClass, InvalidVariableType)
-from .plugins.test_parameters import HeadersTestParameter
+from .parameter_builder import ParameterBuilder
 
 
 def initialize_assertions(assertion_map, assertion_specs):
@@ -23,7 +25,7 @@ def initialize_assertions(assertion_map, assertion_specs):
         yield cls.from_dict(spec)
 
 
-def initialize_test_parameters(test_parameter_plugins, parameter_specs):
+def initialize_test_parameter_loaders(test_parameter_plugins, parameter_specs):
     for name, value in parameter_specs.items():
         cls = test_parameter_plugins.get(name)
         if cls is None:
@@ -34,21 +36,14 @@ def initialize_test_parameters(test_parameter_plugins, parameter_specs):
 class WebTest(object):
 
     def __init__(self, session, config, name, path, assertions,
-                 test_parameters):
+                 parameter_loaders):
         super(WebTest, self).__init__()
         self.session = session
         self.name = name
         self.config = config
         self.path = path
         self.assertions = assertions
-        try:
-            headers_loader = next(loader for loader in test_parameters
-                                  if isinstance(loader, HeadersTestParameter))
-        except StopIteration:
-            headers_loader = None
-        self.headers_loader = headers_loader
-        self.test_parameters = [loader for loader in test_parameters
-                                if loader is not headers_loader]
+        self.parameter_loaders = parameter_loaders
 
     @property
     def url(self):
@@ -63,9 +58,12 @@ class WebTest(object):
             ),
         )
 
-    @property
-    def method(self):
-        return self._get_test_parameters()['method']
+    @contextmanager
+    def test_parameters(self):
+        config = self.config
+        parameter_loaders = self.parameter_loaders
+        with ParameterBuilder(config, parameter_loaders) as test_parameters:
+            yield test_parameters
 
     @classmethod
     def from_dict(cls, session, spec, config, assertions_map,
@@ -76,7 +74,7 @@ class WebTest(object):
         assertion_specs = spec.pop('assertions', [])
         assertions = initialize_assertions(
             assertions_map, assertion_specs)
-        test_parameters = initialize_test_parameters(
+        parameter_loaders = initialize_test_parameter_loaders(
             test_parameter_plugins, spec.pop('parameters', {}))
 
         return cls(
@@ -85,27 +83,8 @@ class WebTest(object):
             name=name,
             path=spec['url'],
             assertions=list(assertions),
-            test_parameters=list(test_parameters),
+            parameter_loaders=list(parameter_loaders),
         )
-
-    def _get_test_parameters(self):
-        config = self.config
-        all_headers = {}
-        parameters = {  # Parameter defaults
-            'method': 'GET',
-        }
-
-        for test_parameter in self.test_parameters:
-            loaded = test_parameter.load(config)
-            all_headers.update(loaded.get('headers', {}))
-            parameters.update(loaded)
-
-        if self.headers_loader is not None:
-            headers = self.headers_loader.load(config)
-            all_headers.update(headers.get('headers', {}))
-
-        parameters['headers'] = all_headers
-        return parameters
 
     def run(self, case):
         try:
@@ -113,11 +92,12 @@ class WebTest(object):
         except InvalidVariableType as exc:
             case.fail(repr(exc))
 
-        test_parameters = self._get_test_parameters()
+        with self.test_parameters() as test_parameters:
+            try:
+                response = self.session.request(url=url, **test_parameters)
+            except ConnectionError as exc:
+                case.fail('{0!r}: Unable to connect: {1!r}'.format(
+                    url, str(exc)))
 
-        try:
-            response = self.session.request(url=url, **test_parameters)
-        except ConnectionError as exc:
-            case.fail('{0!r}: Unable to connect: {1!r}'.format(url, str(exc)))
         for assertion in self.assertions:
             assertion.run(self.config, url, case, response)

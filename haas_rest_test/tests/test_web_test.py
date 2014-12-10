@@ -35,6 +35,10 @@ class TestWebTest(unittest.TestCase):
             'method': MethodTestParameter,
         }
 
+    def _get_web_test_method(self, web_test):
+        with web_test.test_parameters() as test_parameters:
+            return test_parameters['method']
+
     def test_from_dict(self):
         # Given
         config = Config.from_dict({'host': 'test.invalid'}, __file__)
@@ -65,7 +69,7 @@ class TestWebTest(unittest.TestCase):
         self.assertIs(test.config, config)
         self.assertEqual(test.name, name)
         self.assertEqual(test.url, expected_url)
-        self.assertEqual(test.method, 'GET')
+        self.assertEqual(self._get_web_test_method(test), 'GET')
         self.assertEqual(len(test.assertions), 0)
 
     def test_from_different_method(self):
@@ -99,7 +103,7 @@ class TestWebTest(unittest.TestCase):
         self.assertIs(test.config, config)
         self.assertEqual(test.name, name)
         self.assertEqual(test.url, expected_url)
-        self.assertEqual(test.method, 'POST')
+        self.assertEqual(self._get_web_test_method(test), 'POST')
         self.assertEqual(len(test.assertions), 0)
 
     def test_create_with_assertions(self):
@@ -183,7 +187,7 @@ class TestWebTest(unittest.TestCase):
             self.test_parameter_plugins)
 
         responses.add(
-            test.method,
+            self._get_web_test_method(test),
             test.url,
             status=204,
         )
