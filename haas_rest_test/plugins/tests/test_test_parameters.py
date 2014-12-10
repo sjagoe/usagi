@@ -319,9 +319,9 @@ class TestBodyTestParameterMultipart(unittest.TestCase):
         # When
         with loader.load(config) as loaded:
             # Then
-            self.assertIn('data', loaded)
+            self.assertIn('files', loaded)
             self.assertNotIn('headers', loaded)
-            data = loaded['data']
+            data = loaded['files']
             self.assertIn('field1', data)
             self.assertIn('field2', data)
 
@@ -373,9 +373,9 @@ class TestBodyTestParameterMultipartFile(unittest.TestCase):
         # When
         with loader.load(config) as loaded:
             # Then
-            self.assertIn('data', loaded)
+            self.assertIn('files', loaded)
             self.assertNotIn('headers', loaded)
-            data = loaded['data']
+            data = loaded['files']
             self.assertIn('field1', data)
             self.assertIn('field2', data)
 

@@ -245,7 +245,7 @@ class BodyTestParameter(ITestParameter):
         value = self._value
         if self._lookup_var:
             value = config.load_variable('value', value)
-        return self._format_handler(value)
+        return {'data': self._format_handler(value)}
 
     @contextmanager
     def _multipart_value(self, config):
@@ -278,7 +278,7 @@ class BodyTestParameter(ITestParameter):
                     data['filename'], config.test_filename)
                 fh = stack.enter_context(open(file_path, 'rb'))
                 fields[name] = fh
-            yield fields
+            yield {'files': fields}
 
     @contextmanager
     def _get_value(self, config):
@@ -298,5 +298,5 @@ class BodyTestParameter(ITestParameter):
             headers['Content-Type'] = content_type
 
         with self._get_value(config) as value:
-            result['data'] = value
+            result.update(value)
             yield result
