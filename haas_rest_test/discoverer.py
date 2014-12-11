@@ -112,7 +112,7 @@ class RestTestDiscoverer(IDiscovererPlugin):
         return self._loader.create_suite(tests)
 
     def _discover_tests(self, start_directory):
-        pattern = '*.yml'
+        pattern = 'test*.yml'
         for curdir, dirnames, filenames in os.walk(start_directory):
             logger.debug('Discovering tests in %r', curdir)
             for filename in filenames:
