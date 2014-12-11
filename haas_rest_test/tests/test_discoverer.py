@@ -101,10 +101,12 @@ class TestDiscoverer(unittest.TestCase):
 
         """)
         with tempfile.NamedTemporaryFile(
-                delete=False, suffix='.yml', dir=self.temp_dir) as fh:
+                delete=False, prefix='test', suffix='.yml',
+                dir=self.temp_dir) as fh:
             fh.write(test_yaml_1.encode('utf-8'))
         with tempfile.NamedTemporaryFile(
-                delete=False, suffix='.yml', dir=self.temp_dir) as fh:
+                delete=False, prefix='test', suffix='.yml',
+                dir=self.temp_dir) as fh:
             fh.write(test_yaml_2.encode('utf-8'))
 
         # When
@@ -130,6 +132,14 @@ class TestDiscoverer(unittest.TestCase):
               tests:
                 - name: "Test root URL"
                   url: "/"
+            - name: "Basic"
+              tests:
+                - name: "Test root URL"
+                  url: "/"
+            - name: "Basic"
+              tests:
+                - name: "Test root URL"
+                  url: "/"
         """)
         test_yaml_2 = textwrap.dedent("""
         ---
@@ -150,10 +160,16 @@ class TestDiscoverer(unittest.TestCase):
 
         """)
         with tempfile.NamedTemporaryFile(
-                delete=False, suffix='.ymll', dir=self.temp_dir) as fh:
+                delete=False, prefix='test', suffix='.ymll',
+                dir=self.temp_dir) as fh:
             fh.write(test_yaml_1.encode('utf-8'))
         with tempfile.NamedTemporaryFile(
-                delete=False, suffix='.yml', dir=self.temp_dir) as fh:
+                delete=False, prefix='not_test', suffix='.yml',
+                dir=self.temp_dir) as fh:
+            fh.write(test_yaml_1.encode('utf-8'))
+        with tempfile.NamedTemporaryFile(
+                delete=False, prefix='test', suffix='.yml',
+                dir=self.temp_dir) as fh:
             fh.write(test_yaml_2.encode('utf-8'))
 
         # When
