@@ -12,12 +12,14 @@ import sys
 from requests.utils import default_user_agent as requests_user_agent
 import requests
 
+import haas
+
 import usagi
 
 
 def usagi_user_agent():
-    return 'usagi/{0} {1}'.format(
-        usagi.__version__, requests_user_agent())
+    return 'usagi/{0} haas/{1} {2}'.format(
+        usagi.__version__, haas.__version__, requests_user_agent())
 
 
 def create_session():
