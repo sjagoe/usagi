@@ -13,7 +13,7 @@ from setuptools import setup
 
 MAJOR = 0
 MINOR = 1
-MICRO = 0
+MICRO = 1
 
 IS_RELEASED = True
 
