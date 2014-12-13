@@ -13,9 +13,9 @@ from setuptools import setup
 
 MAJOR = 0
 MINOR = 1
-MICRO = 0
+MICRO = 1
 
-IS_RELEASED = False
+IS_RELEASED = True
 
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
@@ -113,8 +113,9 @@ if __name__ == "__main__":
         'stevedore',
         'haas >= 0.6.0',
     ]
+    py26_requires = ['unittest2']
     if sys.version_info < (2, 7):
-        install_requires += ['unittest2']
+        install_requires += py26_requires
 
     write_version_py()
     from usagi import __version__
@@ -168,5 +169,8 @@ if __name__ == "__main__":
                 'file = usagi.plugins.var_loaders:FileVarLoader',
                 'template = usagi.plugins.var_loaders:TemplateVarLoader',  # noqa
             ],
+        },
+        extras_require={
+            ':python_version=="2.6"': py26_requires,
         },
     )
