@@ -149,6 +149,7 @@ if __name__ == "__main__":
         entry_points={
             'haas.discovery': [
                 'rest-test = usagi.discoverer:RestTestDiscoverer',
+                'usagi = usagi.discoverer:RestTestDiscoverer',
             ],
             'usagi.assertions': [
                 'body = usagi.plugins.assertions:BodyAssertion',
