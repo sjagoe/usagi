@@ -15,7 +15,7 @@ import jsonschema
 import six
 import yaml
 
-from haas_rest_test.utils import ExitStack, get_file_path
+from usagi.utils import ExitStack, get_file_path
 from ..exceptions import YamlParseError
 from .i_test_parameter import ITestParameter
 

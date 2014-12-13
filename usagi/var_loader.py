@@ -29,7 +29,7 @@ class VarLoader(object):
         super(VarLoader, self).__init__()
         self.filename = filename
         loaders = ExtensionManager(
-            namespace='haas_rest_test.var_loaders',
+            namespace='usagi.var_loaders',
         )
         self.loaders = dict(
             (name, loaders[name].plugin)

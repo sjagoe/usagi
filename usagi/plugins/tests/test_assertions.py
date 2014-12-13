@@ -12,8 +12,8 @@ from mock import Mock
 
 from haas.testing import unittest
 
-from haas_rest_test.config import Config
-from haas_rest_test.exceptions import YamlParseError
+from usagi.config import Config
+from usagi.exceptions import YamlParseError
 from ..assertions import BodyAssertion, HeaderAssertion, StatusCodeAssertion
 
 

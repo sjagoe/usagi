@@ -13,8 +13,8 @@ import textwrap
 
 from haas.testing import unittest
 
-from haas_rest_test.config import Config
-from haas_rest_test.exceptions import InvalidVariable, YamlParseError
+from usagi.config import Config
+from usagi.exceptions import InvalidVariable, YamlParseError
 from ..test_parameters import (
     BodyTestParameter, HeadersTestParameter, MethodTestParameter,
     QueryParamsTestParameter)

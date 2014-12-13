@@ -53,7 +53,7 @@ def git_version():
     return git_revision, git_count
 
 
-def write_version_py(filename='haas_rest_test/_version.py'):
+def write_version_py(filename='usagi/_version.py'):
     template = """\
 # -*- coding: utf-8 -*-
 # Copyright (c) 2013-2014 Simon Jagoe
@@ -75,14 +75,14 @@ if not is_released:
     fullversion = VERSION
     if os.path.exists('.git'):
         git_rev, dev_num = git_version()
-    elif os.path.exists('haas_rest_test/_version.py'):
+    elif os.path.exists('usagi/_version.py'):
         # must be a source distribution, use existing version file
         try:
-            from haas_rest_test._version import git_revision as git_rev
-            from haas_rest_test._version import full_version as full_v
+            from usagi._version import git_revision as git_rev
+            from usagi._version import full_version as full_v
         except ImportError:
             raise ImportError("Unable to import git_revision. Try removing "
-                              "haas_rest_test/_version.py and the build "
+                              "usagi/_version.py and the build "
                               "directory before building.")
         import re
         match = re.match(r'.*?\.dev(?P<dev_num>\d+)\+.*', full_v)
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         install_requires += ['unittest2']
 
     write_version_py()
-    from haas_rest_test import __version__
+    from usagi import __version__
 
     with open('README.rst') as fh:
         long_description = fh.read()
@@ -144,28 +144,28 @@ if __name__ == "__main__":
         description='Web API testing for haas',
         long_description=long_description,
         license='BSD',
-        packages=['haas_rest_test', 'haas_rest_test.plugins'],
+        packages=['usagi', 'usagi.plugins'],
         install_requires=install_requires,
         entry_points={
             'haas.discovery': [
-                'rest-test = haas_rest_test.discoverer:RestTestDiscoverer',
+                'rest-test = usagi.discoverer:RestTestDiscoverer',
             ],
-            'haas_rest_test.assertions': [
-                'body = haas_rest_test.plugins.assertions:BodyAssertion',
-                'status_code = haas_rest_test.plugins.assertions:StatusCodeAssertion',  # noqa
-                'header = haas_rest_test.plugins.assertions:HeaderAssertion',
+            'usagi.assertions': [
+                'body = usagi.plugins.assertions:BodyAssertion',
+                'status_code = usagi.plugins.assertions:StatusCodeAssertion',  # noqa
+                'header = usagi.plugins.assertions:HeaderAssertion',
             ],
-            'haas_rest_test.parameters': [
-                'body = haas_rest_test.plugins.test_parameters:BodyTestParameter',  # noqa
-                'headers = haas_rest_test.plugins.test_parameters:HeadersTestParameter',  # noqa
-                'method = haas_rest_test.plugins.test_parameters:MethodTestParameter',  # noqa
-                'queryparams = haas_rest_test.plugins.test_parameters:QueryParamsTestParameter',  # noqa
+            'usagi.parameters': [
+                'body = usagi.plugins.test_parameters:BodyTestParameter',  # noqa
+                'headers = usagi.plugins.test_parameters:HeadersTestParameter',  # noqa
+                'method = usagi.plugins.test_parameters:MethodTestParameter',  # noqa
+                'queryparams = usagi.plugins.test_parameters:QueryParamsTestParameter',  # noqa
             ],
-            'haas_rest_test.var_loaders': [
-                'env = haas_rest_test.plugins.var_loaders:EnvVarLoader',
-                'ref = haas_rest_test.plugins.var_loaders:RefVarLoader',
-                'file = haas_rest_test.plugins.var_loaders:FileVarLoader',
-                'template = haas_rest_test.plugins.var_loaders:TemplateVarLoader',  # noqa
+            'usagi.var_loaders': [
+                'env = usagi.plugins.var_loaders:EnvVarLoader',
+                'ref = usagi.plugins.var_loaders:RefVarLoader',
+                'file = usagi.plugins.var_loaders:FileVarLoader',
+                'template = usagi.plugins.var_loaders:TemplateVarLoader',  # noqa
             ],
         },
     )
