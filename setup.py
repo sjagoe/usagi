@@ -123,9 +123,9 @@ if __name__ == "__main__":
         long_description = fh.read()
 
     setup(
-        name='haas-rest-test',
+        name='usagi',
         version=__version__,
-        url='https://github.com/sjagoe/haas-rest-test',
+        url='https://github.com/sjagoe/usagi',
         author='Simon Jagoe',
         author_email='simon@simonjagoe.com',
         classifiers=[

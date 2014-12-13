@@ -23,7 +23,7 @@ class TestDiscoverer(unittest.TestCase):
     def setUp(self):
         self.discoverer = RestTestDiscoverer(Loader())
         self.temp_dir = tempfile.mkdtemp(
-            prefix='haas-rest-test-', suffix='.tmp')
+            prefix='usagi-', suffix='.tmp')
 
     def tearDown(self):
         shutil.rmtree(self.temp_dir)

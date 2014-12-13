@@ -16,7 +16,7 @@ import usagi
 
 
 def usagi_user_agent():
-    return 'haas-rest-test/{0} {1}'.format(
+    return 'usagi/{0} {1}'.format(
         usagi.__version__, requests_user_agent())
 
 

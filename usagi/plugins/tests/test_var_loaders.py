@@ -201,7 +201,7 @@ class TestTemplateVarLoader(unittest.TestCase):
 class TestFileVarLoader(unittest.TestCase):
 
     def setUp(self):
-        self.tempdir = tempfile.mkdtemp(prefix='haas-rest-test-')
+        self.tempdir = tempfile.mkdtemp(prefix='usagi-')
 
     def tearDown(self):
         shutil.rmtree(self.tempdir)

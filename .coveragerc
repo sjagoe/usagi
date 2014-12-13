@@ -1,9 +1,9 @@
 [run]
 branch = True
-source = haas_rest_test
+source = usagi
 omit =
     */tests/*
-    haas_rest_test/_version.py
+    usagi/_version.py
 
 [report]
 # Regexes for lines to exclude from consideration
