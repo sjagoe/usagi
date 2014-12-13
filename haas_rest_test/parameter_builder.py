@@ -14,6 +14,9 @@ from .plugins.test_parameters import HeadersTestParameter
 
 @contextmanager
 def ParameterBuilder(config, parameter_loaders):
+    """Load all of a test's parameters in a context manager.
+
+    """
     try:
         headers_loader = next(loader for loader in parameter_loaders
                               if isinstance(loader, HeadersTestParameter))

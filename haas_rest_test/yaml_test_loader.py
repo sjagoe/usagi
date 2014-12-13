@@ -67,6 +67,15 @@ def _create_reused_tests(session, config, assertions_map,
 
 def create_test_case_for_case(filename, config, case, assertions_map,
                               test_parameter_plugins, test_definitions):
+    """Programatically generate ``TestCases`` from a test specification.
+
+    Returns
+    -------
+    test_case_cls : type
+        A subclass of ``unittest.TestCase`` containing all of the
+        generated tests, in the same order as defined in the file.
+
+    """
     session = create_session()
 
     pre_run_cases = _create_reused_tests(
@@ -115,6 +124,15 @@ def create_test_case_for_case(filename, config, case, assertions_map,
 
 
 class YamlTestLoader(object):
+    """A test case generator, creating ``TestCase`` and ``TestSuite``
+    instances from a single YAML file.
+
+    Parameters
+    ----------
+    loader : haas.loader.Loader
+        The ``haas`` test loader.
+
+    """
 
     def __init__(self, loader):
         super(YamlTestLoader, self).__init__()
@@ -137,11 +155,19 @@ class YamlTestLoader(object):
         )
 
     def load_tests_from_file(self, filename):
+        """Load the YAML test file and create a ``TestSuite`` containing all
+        test cases contained in the file.
+
+        """
         with open(filename) as fh:
             test_structure = yaml.safe_load(fh)
         return self.load_tests_from_yaml(test_structure, filename)
 
     def load_tests_from_yaml(self, test_structure, filename):
+        """Create a ``TestSuite`` containing all test cases contained in the
+        yaml structure.
+
+        """
         loader = self._loader
         try:
             jsonschema.validate(test_structure, SCHEMA)

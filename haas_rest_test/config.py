@@ -10,6 +10,12 @@ from .var_loader import VarLoader
 
 
 class Config(object):
+    """Container for the top-level test configuration.
+
+    This contains all of the top-level configuration, such as the target
+    host and variables to be used in test cases.
+
+    """
 
     def __init__(self, scheme, host, variables, var_loader, test_filename):
         super(Config, self).__init__()

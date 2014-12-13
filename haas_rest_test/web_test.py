@@ -34,6 +34,12 @@ def initialize_test_parameter_loaders(test_parameter_plugins, parameter_specs):
 
 
 class WebTest(object):
+    """The main entry-point into a single web test case.
+
+    The :meth:`WebTest.run() <haas_rest_test.web_test.WebTest.run>`
+    method is executed from within the generated TestCase test method.
+
+    """
 
     def __init__(self, session, config, name, path, assertions,
                  parameter_loaders):
@@ -68,6 +74,9 @@ class WebTest(object):
     @classmethod
     def from_dict(cls, session, spec, config, assertions_map,
                   test_parameter_plugins):
+        """Create a :class:`~.WebTest` from a test specification.
+
+        """
         spec = spec.copy()
         name = spec.pop('name')
 
@@ -87,6 +96,14 @@ class WebTest(object):
         )
 
     def run(self, case):
+        """Execute the web test case, and record results via the ``case``.
+
+        Parameters
+        ----------
+        case : unittest.TestCase
+            The ``TestCase`` instance used to record test results.
+
+        """
         try:
             url = self.url
         except InvalidVariableType as exc:
