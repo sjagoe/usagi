@@ -18,6 +18,15 @@ logger = logging.getLogger(__name__)
 
 
 class RestTestDiscoverer(IDiscovererPlugin):
+    """A ``haas`` test discovery plugin to generate Web API test cases from
+    YAML descriptions.
+
+    Parameters
+    ----------
+    loader : haas.loader.Loader
+        The ``haas`` test loader.
+
+    """
 
     def __init__(self, loader, **kwargs):
         super(RestTestDiscoverer, self).__init__(**kwargs)
