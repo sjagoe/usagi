@@ -36,7 +36,7 @@ class IAssertion(object):
 
         Parameters
         ----------
-        config : haas_rest_test.config.Config
+        config : usagi.config.Config
             The Config that applies to the test case.
         url : str
             The URL that was used for the initial request of this test.

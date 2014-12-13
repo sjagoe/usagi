@@ -1,7 +1,7 @@
 *~
 *.pyc
-/haas_rest_test/_version.py
-/haas_rest_test.egg-info
+/usagi/_version.py
+/usagi.egg-info
 /.coverage
 /htmlcov
 /docs/build

@@ -28,7 +28,7 @@ from .web_test import WebTest
 logger = logging.getLogger(__name__)
 
 
-TEST_NAME_ATTRIBUTE = 'haas_rest_test_name'
+TEST_NAME_ATTRIBUTE = 'usagi_name'
 
 
 def _create_yaml_parse_error_test(filename, error):
@@ -139,10 +139,10 @@ class YamlTestLoader(object):
         self._loader = loader
 
         assertions = ExtensionManager(
-            namespace='haas_rest_test.assertions',
+            namespace='usagi.assertions',
         )
         test_parameters = ExtensionManager(
-            namespace='haas_rest_test.parameters'
+            namespace='usagi.parameters'
         )
 
         self._assertions_map = dict(

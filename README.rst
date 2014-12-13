@@ -1,20 +1,20 @@
-============================================
-haas-rest-test: Web API test plugin for haas
-============================================
+=====================================
+ usagi: Web API test plugin for haas
+=====================================
 
-.. image:: https://api.travis-ci.org/sjagoe/haas-rest-test.png?branch=master
-   :target: https://travis-ci.org/sjagoe/haas-rest-test
+.. image:: https://api.travis-ci.org/sjagoe/usagi.png?branch=master
+   :target: https://travis-ci.org/sjagoe/usagi
    :alt: Build status
 
-.. image:: https://coveralls.io/repos/sjagoe/haas-rest-test/badge.png?branch=master
-   :target: https://coveralls.io/r/sjagoe/haas-rest-test?branch=master
+.. image:: https://coveralls.io/repos/sjagoe/usagi/badge.png?branch=master
+   :target: https://coveralls.io/r/sjagoe/usagi?branch=master
    :alt: Coverage status
 
 
-``haas-rest-test`` is a plugin for haas_ that adds support for
-discovering Web API test cases descibed in YAML.
+``usagi`` is a plugin for haas_ that adds support for discovering Web
+API test cases descibed in YAML.
 
-``haas-rest-test`` requires ``haas v0.6.0`` or later.
+``usagi`` requires ``haas v0.6.0`` or later.
 
 
 .. _haas: https://github.com/sjagoe/haas

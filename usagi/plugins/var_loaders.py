@@ -13,7 +13,7 @@ from jsonschema.exceptions import ValidationError
 import jsonschema
 import yaml
 
-from haas_rest_test.utils import get_file_path
+from usagi.utils import get_file_path
 from ..exceptions import InvalidVariable, YamlParseError
 from .i_var_loader import IVarLoader
 

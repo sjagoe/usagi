@@ -16,8 +16,8 @@ import yaml
 
 from haas.testing import unittest
 
-from haas_rest_test.exceptions import InvalidVariable, YamlParseError
-from haas_rest_test.tests.utils import environment
+from usagi.exceptions import InvalidVariable, YamlParseError
+from usagi.tests.utils import environment
 from ..var_loaders import (
     EnvVarLoader, FileVarLoader, RefVarLoader, TemplateVarLoader)
 
@@ -201,7 +201,7 @@ class TestTemplateVarLoader(unittest.TestCase):
 class TestFileVarLoader(unittest.TestCase):
 
     def setUp(self):
-        self.tempdir = tempfile.mkdtemp(prefix='haas-rest-test-')
+        self.tempdir = tempfile.mkdtemp(prefix='usagi-')
 
     def tearDown(self):
         shutil.rmtree(self.tempdir)

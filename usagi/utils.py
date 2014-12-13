@@ -12,17 +12,19 @@ import sys
 from requests.utils import default_user_agent as requests_user_agent
 import requests
 
-import haas_rest_test
+import haas
+
+import usagi
 
 
-def haas_rest_test_user_agent():
-    return 'haas-rest-test/{0} {1}'.format(
-        haas_rest_test.__version__, requests_user_agent())
+def usagi_user_agent():
+    return 'usagi/{0} haas/{1} {2}'.format(
+        usagi.__version__, haas.__version__, requests_user_agent())
 
 
 def create_session():
     session = requests.Session()
-    session.headers['User-Agent'] = haas_rest_test_user_agent()
+    session.headers['User-Agent'] = usagi_user_agent()
     return session
 
 

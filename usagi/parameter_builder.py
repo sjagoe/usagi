@@ -8,7 +8,7 @@ from __future__ import absolute_import, unicode_literals
 
 from contextlib import contextmanager
 
-from haas_rest_test.utils import ExitStack
+from usagi.utils import ExitStack
 from .plugins.test_parameters import HeadersTestParameter
 
 

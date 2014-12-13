@@ -36,7 +36,7 @@ def initialize_test_parameter_loaders(test_parameter_plugins, parameter_specs):
 class WebTest(object):
     """The main entry-point into a single web test case.
 
-    The :meth:`WebTest.run() <haas_rest_test.web_test.WebTest.run>`
+    The :meth:`WebTest.run() <usagi.web_test.WebTest.run>`
     method is executed from within the generated TestCase test method.
 
     """
