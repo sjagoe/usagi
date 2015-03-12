@@ -86,6 +86,13 @@ class WebTest(object):
         parameter_loaders = initialize_test_parameter_loaders(
             test_parameter_plugins, spec.pop('parameters', {}))
 
+        poll_config = spec.pop('poll', None)
+
+        if poll_config is not None:
+            timeout = poll_config['timeout']
+            period = poll_config['period']
+            cls = lambda **k: WebPoll(period=period, timeout=timeout, **k)
+
         return cls(
             session=session,
             config=config,
@@ -118,3 +125,41 @@ class WebTest(object):
 
         for assertion in self.assertions:
             assertion.run(self.config, url, case, response)
+
+
+class WebPoll(WebTest):
+    """
+    A test type that allows polling.
+
+    """
+
+    def __init__(self, period, timeout, **args):
+        """
+        Parameters
+        ----------
+        period : int
+            The number of seconds between poll attempts.
+        timeout : int
+            Total amount of time to poll before failure.
+
+        """
+        super(WebPoll, self).__init__(**args)
+        self._period = period
+        self._timeout = timeout
+
+    def run(self, case):
+        import time
+        from timeit import default_timer
+        run_poll = lambda: super(WebPoll, self).run(case)
+        start_time = default_timer()
+        while True:
+            try:
+                run_poll()
+            except case.failureException:
+                now = default_timer()
+                duration = now - start_time
+                if duration >= self._timeout:
+                    raise
+                time.sleep(self._period)
+            else:
+                return
