@@ -5,6 +5,12 @@
 Changes since version 0.1.1
 ===========================
 
+Bug fixes
+---------
+
+* Make plaintext body assertions against ``Request.text`` instead of
+  invalid ``Request.body`` attribute (#26).
+
 
 Version 0.1.1 (initial release)
 ===============================

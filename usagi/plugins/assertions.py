@@ -167,6 +167,6 @@ class BodyAssertion(IAssertion):
         if self.format == 'json':
             body = response.json()
         else:
-            body = response.body
+            body = response.text
         msg = '{0!r}: Body does not match expected value'.format(url)
         case.assertEqual(body, value, msg=msg)
