@@ -2,7 +2,11 @@
  Usagi Changelog
 =================
 
-Version 0.1.0 (initial release)
+Changes since version 0.1.1
+===========================
+
+
+Version 0.1.1 (initial release)
 ===============================
 
 Features
