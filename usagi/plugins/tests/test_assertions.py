@@ -360,7 +360,7 @@ class TestBodyAssertion(unittest.TestCase):
         assertion = BodyAssertion.from_dict(spec)
         case = Mock()
         response = Mock()
-        response.body = expected
+        response.text = expected
 
         # When
         assertion.run(config, 'url', case, response)
@@ -386,7 +386,7 @@ class TestBodyAssertion(unittest.TestCase):
         assertion = BodyAssertion.from_dict(spec)
         case = Mock()
         response = Mock()
-        response.body = expected
+        response.text = expected
 
         # When
         assertion.run(config, 'url', case, response)
@@ -413,7 +413,7 @@ class TestBodyAssertion(unittest.TestCase):
         assertion = BodyAssertion.from_dict(spec)
         case = Mock()
         response = Mock()
-        response.body = response_body
+        response.text = response_body
 
         # When
         assertion.run(config, 'url', case, response)
