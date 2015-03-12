@@ -131,6 +131,20 @@ SCHEMA = {
                         {'$ref': '#/definitions/template_var'},
                     ],
                 },
+                'poll': {
+                    'type': 'object',
+                    'properties': {
+                        'period': {
+                            'type': 'integer',
+                            'description': 'Poll period in seconds',
+                        },
+                        'timeout': {
+                            'type': 'integer',
+                            'description': 'Poll timeout in seconds',
+                        },
+                    },
+                    'required': ['period', 'timeout'],
+                },
                 'name': {
                     '$ref': '#/definitions/name',
                 },

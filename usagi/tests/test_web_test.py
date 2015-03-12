@@ -6,9 +6,10 @@
 # of the 3-clause BSD license.  See the LICENSE.txt file for details.
 from __future__ import absolute_import, unicode_literals
 
+import itertools
 import json
 
-from mock import Mock
+from mock import Mock, patch
 import responses
 from six.moves import urllib
 
@@ -23,7 +24,7 @@ from ..plugins.test_parameters import (
 )
 from ..config import Config
 from ..utils import create_session
-from ..web_test import WebTest
+from ..web_test import WebPoll, WebTest
 
 
 class TestWebTest(unittest.TestCase):
@@ -422,3 +423,170 @@ class TestWebTest(unittest.TestCase):
         self.assertEqual(self.body, expected)
         self.assertIn('Content-Type', self.headers)
         self.assertEqual(self.headers['Content-Type'], 'application/json')
+
+    @patch('time.sleep')
+    @patch('timeit.default_timer')
+    @responses.activate
+    def test_poll_success(self, default_timer, sleep):
+        # Given
+        # Disable sleep effect
+        sleep.side_effect = lambda t: None
+
+        current_time = itertools.count(0)
+
+        def _default_timer():
+            return next(current_time)
+
+        default_timer.side_effect = _default_timer
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
+        session = create_session()
+        name = 'A test'
+        url = '/api/test'
+        test_spec = {
+            'name': name,
+            'url': url,
+            'poll': {
+                'period': 1,
+                'timeout': 5,
+            },
+            'assertions': [
+                {
+                    'name': 'status_code',
+                    'expected': 200,
+                },
+            ],
+        }
+        assertions = {
+            'status_code': StatusCodeAssertion,
+        }
+
+        # When
+        test = WebTest.from_dict(
+            session, test_spec, config, assertions,
+            self.test_parameter_plugins)
+
+        # Then
+        self.assertIsInstance(test, WebPoll)
+
+        # Given
+        test_count = [0]
+
+        def _test_callback(request):
+            current_count = test_count[0]
+            test_count[0] = current_count + 1
+            if current_count == 4:
+                return (200, {}, '')
+            return (404, {}, '')
+
+        responses.add_callback(
+            self._get_web_test_method(test),
+            test.url,
+            _test_callback,
+        )
+
+        case = Mock()
+        case.failureException = self.failureException
+
+        def _assertEqual(value, expected, msg=None):
+            if value != expected:
+                raise self.failureException(msg)
+        case.assertEqual.side_effect = _assertEqual
+
+        # When
+        test.run(case)
+
+        # Then
+        self.assertEqual(case.assertEqual.call_count, 5)
+        calls = case.assertEqual.call_args_list
+        call_args = [call[0] for call in calls]
+        expected_calls = [
+            (404, 200),
+            (404, 200),
+            (404, 200),
+            (404, 200),
+            (200, 200),
+        ]
+        self.assertEqual(call_args, expected_calls)
+
+    @patch('time.sleep')
+    @patch('timeit.default_timer')
+    @responses.activate
+    def test_poll_fail(self, default_timer, sleep):
+        # Given
+        # Disable sleep effect
+        sleep.side_effect = lambda t: None
+
+        current_time = itertools.count(0)
+
+        def _default_timer():
+            return next(current_time)
+
+        default_timer.side_effect = _default_timer
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
+        session = create_session()
+        name = 'A test'
+        url = '/api/test'
+        test_spec = {
+            'name': name,
+            'url': url,
+            'poll': {
+                'period': 1,
+                'timeout': 5,
+            },
+            'assertions': [
+                {
+                    'name': 'status_code',
+                    'expected': 200,
+                },
+            ],
+        }
+        assertions = {
+            'status_code': StatusCodeAssertion,
+        }
+
+        # When
+        test = WebTest.from_dict(
+            session, test_spec, config, assertions,
+            self.test_parameter_plugins)
+
+        # Then
+        self.assertIsInstance(test, WebPoll)
+
+        # Given
+        test_count = [0]
+
+        def _test_callback(request):
+            current_count = test_count[0]
+            test_count[0] = current_count + 1
+            return (404, {}, '')
+
+        responses.add_callback(
+            self._get_web_test_method(test),
+            test.url,
+            _test_callback,
+        )
+
+        case = Mock()
+        case.failureException = self.failureException
+
+        def _assertEqual(value, expected, msg=None):
+            if value != expected:
+                raise self.failureException(msg)
+        case.assertEqual.side_effect = _assertEqual
+
+        # When
+        with self.assertRaises(self.failureException):
+            test.run(case)
+
+        # Then
+        self.assertEqual(case.assertEqual.call_count, 5)
+        calls = case.assertEqual.call_args_list
+        call_args = [call[0] for call in calls]
+        expected_calls = [
+            (404, 200),
+            (404, 200),
+            (404, 200),
+            (404, 200),
+            (404, 200),
+        ]
+        self.assertEqual(call_args, expected_calls)

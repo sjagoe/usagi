@@ -5,6 +5,12 @@
 Changes since version 0.1.1
 ===========================
 
+Enhancements
+------------
+
+* Add test option to poll for assertion conditions (#40).
+
+
 Bug fixes
 ---------
 
