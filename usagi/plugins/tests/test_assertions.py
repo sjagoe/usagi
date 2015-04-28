@@ -8,12 +8,13 @@ from __future__ import absolute_import, unicode_literals
 
 import re
 
+import time
 from mock import Mock
 
 from haas.testing import unittest
 
 from usagi.config import Config
-from usagi.exceptions import YamlParseError
+from usagi.exceptions import JqCompileError, YamlParseError
 from ..assertions import BodyAssertion, HeaderAssertion, StatusCodeAssertion
 
 
@@ -447,5 +448,112 @@ class TestBodyAssertion(unittest.TestCase):
         self.assertEqual(case.assertEqual.call_count, 1)
         call = case.assertEqual.call_args
         args, kwargs = call
+        self.assertEqual(args, (spec['value'], assertion.value))
+        self.assertIn('msg', kwargs)
+
+    def test_body_assertion_construct_invalid_jq_filter(self):
+        # Given
+        spec = {
+            'type': 'body',
+            'format': 'json',
+            'value': '{}',
+            'lookup-var': False,
+            'filter': 'badjqfilter!'
+        }
+
+        # When/Then
+        with self.assertRaises(JqCompileError):
+            BodyAssertion.from_dict(spec)
+
+    def test_body_assertion_jq_filter(self):
+        # Given
+        config = Config.from_dict({'host': 'host'}, __file__)
+        value = {
+            'object1': {
+                'dynamic': 1,
+                'static': 'Value1',
+            },
+            'object2': {
+                'dynamic': 2,
+                'static': 'Value2',
+            },
+        }
+        expected = value.copy()
+        for key, obj in value.items():
+            # Deliberately not deterministic
+            obj['dynamic'] = obj['dynamic'] + time.time()
+        spec = {
+            'type': 'body',
+            'format': 'json',
+            'value': expected,
+            'lookup-var': False,
+            # Filter to remove the non-deterministic value from
+            # response and assertion value
+            'filter': 'with_entries(del(.value.dynamic))',
+        }
+        assertion = BodyAssertion.from_dict(spec)
+        case = Mock()
+        response = Mock()
+        response.json.return_value = value
+
+        expected_call = {
+            'object1': {
+                'static': 'Value1',
+            },
+            'object2': {
+                'static': 'Value2',
+            },
+        }
+
+        # When
+        assertion.run(config, 'url', case, response)
+
+        # Then
+        self.assertEqual(case.assertEqual.call_count, 1)
+        call = case.assertEqual.call_args
+        args, kwargs = call
+        self.assertEqual(args, (expected_call, expected_call))
+        self.assertIn('msg', kwargs)
+
+    def test_body_assertion_ineffective_jq_filter(self):
+        # Given
+        config = Config.from_dict({'host': 'host'}, __file__)
+        value = {
+            'object1': {
+                'dynamic': 1,
+                'static': 'Value1',
+            },
+            'object2': {
+                'dynamic': 2,
+                'static': 'Value2',
+            },
+        }
+        expected = value.copy()
+        for key, obj in value.items():
+            # Deliberately not deterministic
+            obj['dynamic'] = obj['dynamic'] + time.time()
+        spec = {
+            'type': 'body',
+            'format': 'json',
+            'value': expected,
+            'lookup-var': False,
+            # Filter to remove the non-deterministic value from
+            # response and assertion value
+            'filter': 'with_entries(del(.value.other))',
+        }
+        assertion = BodyAssertion.from_dict(spec)
+        case = Mock()
+        response = Mock()
+        response.json.return_value = value
+
+        # When
+        assertion.run(config, 'url', case, response)
+
+        # Then
+        self.assertEqual(case.assertEqual.call_count, 1)
+        call = case.assertEqual.call_args
+        args, kwargs = call
+        # The filter has not removed the dynamic value; the original
+        # body and assertion value are used for comparison
         self.assertEqual(args, (spec['value'], assertion.value))
         self.assertIn('msg', kwargs)

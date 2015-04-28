@@ -112,6 +112,7 @@ if __name__ == "__main__":
         'six',
         'stevedore',
         'haas >= 0.6.0',
+        'jq >= 0.1.3, < 0.2',
     ]
     py26_requires = ['unittest2']
     if sys.version_info < (2, 7):
