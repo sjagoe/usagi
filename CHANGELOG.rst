@@ -5,6 +5,12 @@
 Changes since version 0.2.0
 ===========================
 
+Enhancements
+------------
+
+* Added an option to the body assertion to filter json responses with a
+  ``jq`` (https://pypi.python.org/pypi/jq) filter (#44).
+
 
 Version 0.2.0
 =============
