@@ -11,6 +11,7 @@ import json
 
 from mock import Mock, patch
 import responses
+import six
 from six.moves import urllib
 
 from haas.testing import unittest
@@ -28,6 +29,9 @@ from ..web_test import WebPoll, WebTest
 
 
 class TestWebTest(unittest.TestCase):
+
+    if six.PY2:
+        assertRegex = unittest.TestCase.assertRegexpMatches
 
     def setUp(self):
         self.test_parameter_plugins = {
@@ -303,7 +307,7 @@ class TestWebTest(unittest.TestCase):
         # Then
         self.assertEqual(case.fail.call_count, 1)
         args, kwargs = case.fail.call_args
-        self.assertRegexpMatches(
+        self.assertRegex(
             args[0],
             """InvalidVariableType\(u?['"]Missing type.*"""
         )
