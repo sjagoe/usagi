@@ -316,3 +316,69 @@ class TestYamlTestLoader(unittest.TestCase):
         self.assertEqual(test.request.url, 'http://test.domain/another')
         self.assertEqual(post_1.request.url, 'http://test.domain/one')
         self.assertEqual(post_2.request.url, 'http://test.domain/two')
+
+    def test_load_yaml_tests_case_max_diff_null(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+        ---
+          version: '1.0'
+
+          config:
+            host: test.domain
+
+          cases:
+            - name: "Basic"
+              max-diff: null
+              tests:
+                - name: "Test root URL"
+                  url: "/"
+                - name: "Test sub URL"
+                  url: "/sub/"
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # When
+        suite = self.loader.load_tests_from_yaml(
+            test_data, '/path/to/foo.yaml')
+
+        # Then
+        self.assertIsInstance(suite, TestSuite)
+        self.assertEqual(suite.countTestCases(), 2)
+        cls1, cls2 = [type(case) for case in find_test_cases(suite)]
+        self.assertIs(cls1, cls2)
+        self.assertIsNone(cls1.maxDiff)
+
+    def test_load_yaml_tests_case_max_diff_number(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+        ---
+          version: '1.0'
+
+          config:
+            host: test.domain
+
+          cases:
+            - name: "Basic"
+              max-diff: 1234
+              tests:
+                - name: "Test root URL"
+                  url: "/"
+                - name: "Test sub URL"
+                  url: "/sub/"
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # When
+        suite = self.loader.load_tests_from_yaml(
+            test_data, '/path/to/foo.yaml')
+
+        # Then
+        self.assertIsInstance(suite, TestSuite)
+        self.assertEqual(suite.countTestCases(), 2)
+        cls1, cls2 = [type(case) for case in find_test_cases(suite)]
+        self.assertIs(cls1, cls2)
+        self.assertEqual(cls1.maxDiff, 1234)

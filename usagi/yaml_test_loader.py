@@ -98,6 +98,9 @@ def create_test_case_for_case(filename, config, case, assertions_map,
     )
     class_dict[TEST_NAME_ATTRIBUTE] = case['name']
 
+    if 'max-diff' in case:
+        class_dict['maxDiff'] = case['max-diff']
+
     def __str__(self):
         method = getattr(self, self._testMethodName)
         template = '{0!r} ({1})'
