@@ -10,8 +10,9 @@ import re
 
 from jsonschema.exceptions import ValidationError
 import jsonschema
+from jq import jq
 
-from ..exceptions import YamlParseError
+from ..exceptions import JqCompileError, YamlParseError
 from .i_assertion import IAssertion
 
 
@@ -134,6 +135,10 @@ class BodyAssertion(IAssertion):
                     {'$ref': '#/definitions/obj'},
                 ],
             },
+            'filter': {
+                'description': 'A jq filter to apply to the body and the assertion value before comparison',  # noqa
+                'type': 'string',
+            },
         },
         'definitions': {
             'str': {'type': 'string'},
@@ -142,10 +147,11 @@ class BodyAssertion(IAssertion):
         'required': ['value']
     }
 
-    def __init__(self, format, value, lookup_var):
+    def __init__(self, format, value, jq_filter, lookup_var):
         super(BodyAssertion, self).__init__()
         self.format = format
         self.value = value
+        self.jq_filter = jq_filter
         self.lookup_var = lookup_var
 
     @classmethod
@@ -154,9 +160,20 @@ class BodyAssertion(IAssertion):
             jsonschema.validate(data, cls._schema)
         except ValidationError as e:
             raise YamlParseError(str(e))
+
+        filter_ = data.get('filter', None)
+        if filter_ is not None:
+            try:
+                jq_filter = jq(filter_)
+            except ValueError as e:
+                raise JqCompileError(str(e))
+        else:
+            jq_filter = None
+
         return cls(
             format=data.get('format', 'plain'),
             value=data['value'],
+            jq_filter=jq_filter,
             lookup_var=data.get('lookup-var', True),
         )
 
@@ -168,5 +185,11 @@ class BodyAssertion(IAssertion):
             body = response.json()
         else:
             body = response.text
+
+        jq_filter = self.jq_filter
+        if jq_filter is not None:
+            value = jq_filter.transform(value)
+            body = jq_filter.transform(body)
+
         msg = '{0!r}: Body does not match expected value'.format(url)
         case.assertEqual(body, value, msg=msg)

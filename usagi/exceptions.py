@@ -6,6 +6,10 @@ class YamlParseError(HaasRestTestError):
     pass
 
 
+class JqCompileError(HaasRestTestError):
+    pass
+
+
 class InvalidAssertionClass(HaasRestTestError):
     pass
 
