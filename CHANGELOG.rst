@@ -10,6 +10,8 @@ Enhancements
 
 * Added an option to the body assertion to filter json responses with a
   ``jq`` (https://pypi.python.org/pypi/jq) filter (#44).
+* Added an option to cases and tests to allow setting the
+  unittest.TestCase.maxDiff parameter (#47).
 
 
 Version 0.2.0

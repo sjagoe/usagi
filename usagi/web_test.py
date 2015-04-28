@@ -33,6 +33,9 @@ def initialize_test_parameter_loaders(test_parameter_plugins, parameter_specs):
         yield cls.from_dict({name: value})
 
 
+_Default = object()
+
+
 class WebTest(object):
     """The main entry-point into a single web test case.
 
@@ -42,7 +45,7 @@ class WebTest(object):
     """
 
     def __init__(self, session, config, name, path, assertions,
-                 parameter_loaders):
+                 parameter_loaders, max_diff):
         super(WebTest, self).__init__()
         self.session = session
         self.name = name
@@ -50,6 +53,7 @@ class WebTest(object):
         self.path = path
         self.assertions = assertions
         self.parameter_loaders = parameter_loaders
+        self.max_diff = max_diff
 
     @property
     def url(self):
@@ -80,6 +84,8 @@ class WebTest(object):
         spec = spec.copy()
         name = spec.pop('name')
 
+        max_diff = spec.pop('max-diff', _Default)
+
         assertion_specs = spec.pop('assertions', [])
         assertions = initialize_assertions(
             assertions_map, assertion_specs)
@@ -100,6 +106,7 @@ class WebTest(object):
             path=spec['url'],
             assertions=list(assertions),
             parameter_loaders=list(parameter_loaders),
+            max_diff=max_diff,
         )
 
     def run(self, case):
@@ -111,6 +118,9 @@ class WebTest(object):
             The ``TestCase`` instance used to record test results.
 
         """
+        if self.max_diff is not _Default:
+            case.maxDiff = self.max_diff
+
         try:
             url = self.url
         except InvalidVariableType as exc:

@@ -118,12 +118,18 @@ SCHEMA = {
                     },
                     'minItems': 1,
                 },
+                'max-diff': {
+                    '$ref': '#/definitions/max-diff',
+                },
             },
             'required': ['name', 'tests'],
         },
         'test': {
             'type': 'object',
             'properties': {
+                'max-diff': {
+                    '$ref': '#/definitions/max-diff',
+                },
                 'parameters': {'type': 'object'},
                 'url': {
                     'oneOf': [
@@ -154,6 +160,10 @@ SCHEMA = {
                 },
             },
             'required': ['url', 'name'],
+        },
+        'max-diff': {
+            'type': ['number', 'null'],
+            'description': 'Set the case maxDiff option to control error output',  # noqa
         },
     },
 }
