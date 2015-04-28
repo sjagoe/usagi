@@ -337,3 +337,137 @@ class TestSchema(unittest.TestCase):
         # Validation fails
         with self.assertRaises(ValidationError):
             jsonschema.validate(test_data, SCHEMA)
+
+    def test_schema_case_max_diff_null(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+          version: '1.0'
+
+          config:
+            host: test.domain
+
+          cases:
+            - name: "Basic"
+              max-diff: null
+              tests:
+                - name: "Another URL"
+                  url: "/another"
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # Validation succeeds
+        jsonschema.validate(test_data, SCHEMA)
+
+    def test_schema_case_max_diff_number(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+          version: '1.0'
+
+          config:
+            host: test.domain
+
+          cases:
+            - name: "Basic"
+              max-diff: 12345
+              tests:
+                - name: "Another URL"
+                  url: "/another"
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # Validation succeeds
+        jsonschema.validate(test_data, SCHEMA)
+
+    def test_schema_case_max_diff_string(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+          version: '1.0'
+
+          config:
+            host: test.domain
+
+          cases:
+            - name: "Basic"
+              max-diff: '12345'
+              tests:
+                - name: "Another URL"
+                  url: "/another"
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # Validation fails
+        with self.assertRaises(ValidationError):
+            jsonschema.validate(test_data, SCHEMA)
+
+    def test_schema_test_max_diff_null(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+          version: '1.0'
+
+          config:
+            host: test.domain
+
+          cases:
+            - name: "Basic"
+              tests:
+                - name: "Another URL"
+                  url: "/another"
+                  max-diff: null
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # Validation succeeds
+        jsonschema.validate(test_data, SCHEMA)
+
+    def test_schema_test_max_diff_number(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+          version: '1.0'
+
+          config:
+            host: test.domain
+
+          cases:
+            - name: "Basic"
+              tests:
+                - name: "Another URL"
+                  url: "/another"
+                  max-diff: 12345
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # Validation succeeds
+        jsonschema.validate(test_data, SCHEMA)
+
+    def test_schema_test_max_diff_string(self):
+        # Given
+        test_yaml = textwrap.dedent("""
+          version: '1.0'
+
+          config:
+            host: test.domain
+
+          cases:
+            - name: "Basic"
+              tests:
+                - name: "Another URL"
+                  url: "/another"
+                  max-diff: '12345'
+
+        """)
+
+        test_data = yaml.safe_load(test_yaml)
+
+        # Validation fails
+        with self.assertRaises(ValidationError):
+            jsonschema.validate(test_data, SCHEMA)
