@@ -25,7 +25,7 @@ from ..plugins.test_parameters import (
 )
 from ..config import Config
 from ..utils import create_session
-from ..web_test import WebPoll, WebTest
+from ..web_test import WebPoll, WebTest, _Default
 
 
 class TestWebTest(unittest.TestCase):
@@ -72,6 +72,77 @@ class TestWebTest(unittest.TestCase):
         # Then
         self.assertIs(test.session, session)
         self.assertIs(test.config, config)
+        self.assertIs(test.max_diff, _Default)
+        self.assertEqual(test.name, name)
+        self.assertEqual(test.url, expected_url)
+        self.assertEqual(self._get_web_test_method(test), 'GET')
+        self.assertEqual(len(test.assertions), 0)
+
+    def test_from_dict_null_max_diff(self):
+        # Given
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
+        session = create_session()
+        name = 'A test'
+        url = '/api/test'
+        test_spec = {
+            'name': name,
+            'url': url,
+            'max-diff': None,
+        }
+        expected_url = urllib.parse.urlunparse(
+            urllib.parse.ParseResult(
+                config.scheme,
+                config.host,
+                url,
+                None,
+                None,
+                None,
+            ),
+        )
+
+        # When
+        test = WebTest.from_dict(
+            session, test_spec, config, {}, self.test_parameter_plugins)
+
+        # Then
+        self.assertIs(test.session, session)
+        self.assertIs(test.config, config)
+        self.assertIsNone(test.max_diff)
+        self.assertEqual(test.name, name)
+        self.assertEqual(test.url, expected_url)
+        self.assertEqual(self._get_web_test_method(test), 'GET')
+        self.assertEqual(len(test.assertions), 0)
+
+    def test_from_dict_integer_max_diff(self):
+        # Given
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
+        session = create_session()
+        name = 'A test'
+        url = '/api/test'
+        test_spec = {
+            'name': name,
+            'url': url,
+            'max-diff': 5001,
+        }
+        expected_url = urllib.parse.urlunparse(
+            urllib.parse.ParseResult(
+                config.scheme,
+                config.host,
+                url,
+                None,
+                None,
+                None,
+            ),
+        )
+
+        # When
+        test = WebTest.from_dict(
+            session, test_spec, config, {}, self.test_parameter_plugins)
+
+        # Then
+        self.assertIs(test.session, session)
+        self.assertIs(test.config, config)
+        self.assertEqual(test.max_diff, 5001)
         self.assertEqual(test.name, name)
         self.assertEqual(test.url, expected_url)
         self.assertEqual(self._get_web_test_method(test), 'GET')
@@ -106,6 +177,7 @@ class TestWebTest(unittest.TestCase):
         # Then
         self.assertIs(test.session, session)
         self.assertIs(test.config, config)
+        self.assertIs(test.max_diff, _Default)
         self.assertEqual(test.name, name)
         self.assertEqual(test.url, expected_url)
         self.assertEqual(self._get_web_test_method(test), 'POST')
@@ -207,6 +279,73 @@ class TestWebTest(unittest.TestCase):
         args, kwargs = call
         self.assertEqual(args, (204, 200))
         self.assertIn('msg', kwargs)
+
+        # No maxDiff has been set
+        self.assertIsInstance(case.maxDiff, Mock)
+
+    @responses.activate
+    def test_run_null_max_diff(self):
+        # Given
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
+        session = create_session()
+        name = 'A test'
+        url = '/api/test'
+        test_spec = {
+            'name': name,
+            'url': url,
+            'max-diff': None,
+        }
+        assertions = {}
+
+        test = WebTest.from_dict(
+            session, test_spec, config, assertions,
+            self.test_parameter_plugins)
+
+        responses.add(
+            self._get_web_test_method(test),
+            test.url,
+            status=204,
+        )
+
+        # When
+        case = Mock()
+        test.run(case)
+
+        # Then
+        # maxDiff set to None
+        self.assertIs(case.maxDiff, None)
+
+    @responses.activate
+    def test_run_int_max_diff(self):
+        # Given
+        config = Config.from_dict({'host': 'test.invalid'}, __file__)
+        session = create_session()
+        name = 'A test'
+        url = '/api/test'
+        test_spec = {
+            'name': name,
+            'url': url,
+            'max-diff': 2121,
+        }
+        assertions = {}
+
+        test = WebTest.from_dict(
+            session, test_spec, config, assertions,
+            self.test_parameter_plugins)
+
+        responses.add(
+            self._get_web_test_method(test),
+            test.url,
+            status=204,
+        )
+
+        # When
+        case = Mock()
+        test.run(case)
+
+        # Then
+        # maxDiff set to value
+        self.assertEqual(case.maxDiff, 2121)
 
     def test_connection_error(self):
         # Given
