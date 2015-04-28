@@ -6,6 +6,7 @@
 # of the 3-clause BSD license.  See the LICENSE.txt file for details.
 from __future__ import absolute_import, unicode_literals
 
+import hashlib
 import re
 
 from jsonschema.exceptions import ValidationError
@@ -193,3 +194,46 @@ class BodyAssertion(IAssertion):
 
         msg = '{0!r}: Body does not match expected value'.format(url)
         case.assertEqual(body, value, msg=msg)
+
+
+class Sha256BodyAssertion(IAssertion):
+
+    _schema = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'Assertion the SHA256SUM of the response body',
+        'description': 'Test case markup for Haas Rest Test',
+        'type': 'object',
+        'properties': {
+            'expected': {
+                'description': 'The hex-encoded SHA256',
+                'type': 'string',
+            },
+        },
+        'required': ['expected']
+    }
+
+    def __init__(self, expected):
+        super(Sha256BodyAssertion, self).__init__()
+        self.expected = expected
+
+    @classmethod
+    def from_dict(cls, data):
+        try:
+            jsonschema.validate(data, cls._schema)
+        except ValidationError as e:
+            raise YamlParseError(str(e))
+
+        return cls(
+            expected=data['expected'].lower(),
+        )
+
+    def run(self, config, url, case, response):
+        expected = self.expected
+
+        sha256sum = hashlib.sha256()
+        for chunk in response.iter_content(chunk_size=16834):
+            sha256sum.update(chunk)
+        sha256 = sha256sum.hexdigest().lower()
+
+        msg = '{0!r}: Body SHA256 does not match expected value'.format(url)
+        case.assertEqual(sha256, expected, msg=msg)
