@@ -115,7 +115,7 @@ class BodyAssertion(IAssertion):
 
     _schema = {
         '$schema': 'http://json-schema.org/draft-04/schema#',
-        'title': 'Assertion on status code',
+        'title': 'Assertion on body content',
         'description': 'Test case markup for Haas Rest Test',
         'type': 'object',
         'properties': {
