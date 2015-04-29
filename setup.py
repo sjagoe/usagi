@@ -155,6 +155,7 @@ if __name__ == "__main__":
             ],
             'usagi.assertions': [
                 'body = usagi.plugins.assertions:BodyAssertion',
+                'sha256 = usagi.plugins.assertions:Sha256BodyAssertion',
                 'status_code = usagi.plugins.assertions:StatusCodeAssertion',  # noqa
                 'header = usagi.plugins.assertions:HeaderAssertion',
             ],

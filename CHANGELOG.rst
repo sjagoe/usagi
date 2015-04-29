@@ -8,6 +8,8 @@ Changes since version 0.2.0
 Enhancements
 ------------
 
+* Added an assertion type to assert that the sha256sum of a binary
+  response matches a provided value (#34).
 * Added an option to the body assertion to filter json responses with a
   ``jq`` (https://pypi.python.org/pypi/jq) filter (#44).
 * Added an option to cases and tests to allow setting the

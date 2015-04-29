@@ -6,16 +6,20 @@
 # of the 3-clause BSD license.  See the LICENSE.txt file for details.
 from __future__ import absolute_import, unicode_literals
 
+import hashlib
 import re
-
 import time
+
 from mock import Mock
+import requests
+import responses
 
 from haas.testing import unittest
 
 from usagi.config import Config
 from usagi.exceptions import JqCompileError, YamlParseError
-from ..assertions import BodyAssertion, HeaderAssertion, StatusCodeAssertion
+from ..assertions import (
+    BodyAssertion, HeaderAssertion, Sha256BodyAssertion, StatusCodeAssertion)
 
 
 class TestStatusCodeAssertion(unittest.TestCase):
@@ -556,4 +560,81 @@ class TestBodyAssertion(unittest.TestCase):
         # The filter has not removed the dynamic value; the original
         # body and assertion value are used for comparison
         self.assertEqual(args, (spec['value'], assertion.value))
+        self.assertIn('msg', kwargs)
+
+
+class TestSha256BodyAssertion(unittest.TestCase):
+
+    def test_missing_value(self):
+        # Given
+        spec = {
+            'type': 'sha256',
+        }
+        # When/Then
+        with self.assertRaises(YamlParseError):
+            Sha256BodyAssertion.from_dict(spec)
+
+    @responses.activate
+    def test_sha256_assertion_success(self):
+        # Given
+        url = 'http://localhost'
+        body = 'data'.encode('ascii')
+        expected = hashlib.sha256(body).hexdigest()
+        responses.add(
+            responses.GET,
+            url,
+            body=body,
+            status=200,
+        )
+        response = requests.get(url)
+
+        config = Config.from_dict({'host': 'host'}, __file__)
+        spec = {
+            'type': 'sha256',
+            'expected': expected,
+        }
+        assertion = Sha256BodyAssertion.from_dict(spec)
+        case = Mock()
+
+        # When
+        assertion.run(config, url, case, response)
+
+        # Then
+        self.assertEqual(case.assertEqual.call_count, 1)
+        call = case.assertEqual.call_args
+        args, kwargs = call
+        self.assertEqual(args, (spec['expected'], assertion.expected))
+        self.assertIn('msg', kwargs)
+
+    @responses.activate
+    def test_sha256_assertion_failure(self):
+        # Given
+        url = 'http://localhost'
+        expected = hashlib.sha256('data'.encode('ascii')).hexdigest()
+        body = 'other-data'.encode('ascii')
+        actual = hashlib.sha256(body).hexdigest()
+        responses.add(
+            responses.GET,
+            url,
+            body=body,
+            status=200,
+        )
+        response = requests.get(url)
+
+        config = Config.from_dict({'host': 'host'}, __file__)
+        spec = {
+            'type': 'sha256',
+            'expected': expected,
+        }
+        assertion = Sha256BodyAssertion.from_dict(spec)
+        case = Mock()
+
+        # When
+        assertion.run(config, url, case, response)
+
+        # Then
+        self.assertEqual(case.assertEqual.call_count, 1)
+        call = case.assertEqual.call_args
+        args, kwargs = call
+        self.assertEqual(args, (actual, expected))
         self.assertIn('msg', kwargs)
