@@ -35,7 +35,12 @@ Current Features
 
 * Make flexible assertions about the server's response.
 
-* Contribute web API test runner functionality through plugins
+* Contribute web API test runner functionality through plugins.
+
+* Assert that the SHA256 of the response body matches an expected value.
+
+* Filter JSON response bodies before comparison using ``jq`` filter
+  syntax: http://stedolan.github.io/jq/
 
 
 Plugins
