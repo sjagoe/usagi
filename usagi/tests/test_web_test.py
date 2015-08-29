@@ -16,6 +16,7 @@ from six.moves import urllib
 
 from haas.testing import unittest
 
+from usagi.tests.common import MockTestCase
 from ..exceptions import InvalidAssertionClass, InvalidParameterClass
 from ..plugins.assertions import StatusCodeAssertion
 from ..plugins.test_parameters import (
@@ -270,7 +271,7 @@ class TestWebTest(unittest.TestCase):
         )
 
         # When
-        case = Mock()
+        case = MockTestCase()
         test.run(case)
 
         # Then
@@ -308,7 +309,7 @@ class TestWebTest(unittest.TestCase):
         )
 
         # When
-        case = Mock()
+        case = MockTestCase()
         test.run(case)
 
         # Then
@@ -340,13 +341,14 @@ class TestWebTest(unittest.TestCase):
         )
 
         # When
-        case = Mock()
+        case = MockTestCase()
         test.run(case)
 
         # Then
         # maxDiff set to value
         self.assertEqual(case.maxDiff, 2121)
 
+    @responses.activate
     def test_connection_error(self):
         # Given
         config = Config.from_dict({'host': 'test.invalid'}, __file__)
@@ -372,7 +374,7 @@ class TestWebTest(unittest.TestCase):
             self.test_parameter_plugins)
 
         # When
-        case = Mock()
+        case = MockTestCase()
         case.fail.side_effect = AssertionError
         with self.assertRaises(AssertionError):
             test.run(case)
@@ -436,7 +438,7 @@ class TestWebTest(unittest.TestCase):
         test = WebTest.from_dict(
             session, test_spec, config, {},
             self.test_parameter_plugins)
-        case = Mock()
+        case = MockTestCase()
         case.fail.side_effect = AssertionError
 
         # When
@@ -488,7 +490,7 @@ class TestWebTest(unittest.TestCase):
             self.test_parameter_plugins)
 
         # When
-        case = Mock()
+        case = MockTestCase()
         test.run(case)
 
         # Then
@@ -557,7 +559,7 @@ class TestWebTest(unittest.TestCase):
             self.test_parameter_plugins)
 
         # When
-        case = Mock()
+        case = MockTestCase()
         test.run(case)
 
         # Then
@@ -627,7 +629,7 @@ class TestWebTest(unittest.TestCase):
             _test_callback,
         )
 
-        case = Mock()
+        case = MockTestCase()
         case.failureException = self.failureException
 
         def _assertEqual(value, expected, msg=None):
@@ -709,7 +711,7 @@ class TestWebTest(unittest.TestCase):
             _test_callback,
         )
 
-        case = Mock()
+        case = MockTestCase()
         case.failureException = self.failureException
 
         def _assertEqual(value, expected, msg=None):

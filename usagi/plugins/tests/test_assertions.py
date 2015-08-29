@@ -18,6 +18,7 @@ from haas.testing import unittest
 
 from usagi.config import Config
 from usagi.exceptions import JqCompileError, YamlParseError
+from usagi.tests.common import MockTestCase
 from ..assertions import (
     BodyAssertion, HeaderAssertion, Sha256BodyAssertion, StatusCodeAssertion)
 
@@ -78,7 +79,7 @@ class TestStatusCodeAssertion(unittest.TestCase):
         config = Config.from_dict({'host': 'host'}, __file__)
         response = Mock()
         response.status_code = 400
-        case = Mock()
+        case = MockTestCase()
         assertion = StatusCodeAssertion(200)
 
         # When
@@ -96,7 +97,7 @@ class TestStatusCodeAssertion(unittest.TestCase):
         config = Config.from_dict({'host': 'host'}, __file__)
         response = Mock()
         response.status_code = 200
-        case = Mock()
+        case = MockTestCase()
         assertion = StatusCodeAssertion(200)
 
         # When
@@ -156,7 +157,7 @@ class TestHeaderAssertion(unittest.TestCase):
         self.assertEqual(assertion.regexp, False)
 
         # When
-        case = Mock()
+        case = MockTestCase()
         assertion.run(config, 'http://host/uri', case, response)
 
         # Then
@@ -193,7 +194,7 @@ class TestHeaderAssertion(unittest.TestCase):
         self.assertEqual(assertion.regexp, False)
 
         # When
-        case = Mock()
+        case = MockTestCase()
         assertion.run(config, 'http://host/uri', case, response)
 
         # Then
@@ -235,7 +236,7 @@ class TestHeaderAssertion(unittest.TestCase):
         self.assertEqual(assertion.regexp, False)
 
         # When
-        case = Mock()
+        case = MockTestCase()
         case.assertEqual.side_effect = AssertionError
         with self.assertRaises(AssertionError):
             assertion.run(config, 'http://host/uri', case, response)
@@ -280,7 +281,7 @@ class TestHeaderAssertion(unittest.TestCase):
         self.assertEqual(assertion.regexp, True)
 
         # When
-        case = Mock()
+        case = MockTestCase()
         assertion.run(config, 'http://host/uri', case, response)
 
         # Then
@@ -323,7 +324,7 @@ class TestHeaderAssertion(unittest.TestCase):
         self.assertEqual(assertion.regexp, True)
 
         # When
-        case = Mock()
+        case = MockTestCase()
         case.assertRegexpMatches.side_effect = AssertionError
         with self.assertRaises(AssertionError):
             assertion.run(config, 'http://host/uri', case, response)
@@ -363,7 +364,7 @@ class TestBodyAssertion(unittest.TestCase):
             'value': expected,
         }
         assertion = BodyAssertion.from_dict(spec)
-        case = Mock()
+        case = MockTestCase()
         response = Mock()
         response.text = expected
 
@@ -389,7 +390,7 @@ class TestBodyAssertion(unittest.TestCase):
             'value': {'type': 'ref', 'var': 'some_var'},
         }
         assertion = BodyAssertion.from_dict(spec)
-        case = Mock()
+        case = MockTestCase()
         response = Mock()
         response.text = expected
 
@@ -416,7 +417,7 @@ class TestBodyAssertion(unittest.TestCase):
             'value': {'type': 'ref', 'var': 'some_var'},
         }
         assertion = BodyAssertion.from_dict(spec)
-        case = Mock()
+        case = MockTestCase()
         response = Mock()
         response.text = response_body
 
@@ -441,7 +442,7 @@ class TestBodyAssertion(unittest.TestCase):
             'lookup-var': False,
         }
         assertion = BodyAssertion.from_dict(spec)
-        case = Mock()
+        case = MockTestCase()
         response = Mock()
         response.json.return_value = expected
 
@@ -496,7 +497,7 @@ class TestBodyAssertion(unittest.TestCase):
             'filter': 'with_entries(del(.value.dynamic))',
         }
         assertion = BodyAssertion.from_dict(spec)
-        case = Mock()
+        case = MockTestCase()
         response = Mock()
         response.json.return_value = value
 
@@ -546,7 +547,7 @@ class TestBodyAssertion(unittest.TestCase):
             'filter': 'with_entries(del(.value.other))',
         }
         assertion = BodyAssertion.from_dict(spec)
-        case = Mock()
+        case = MockTestCase()
         response = Mock()
         response.json.return_value = value
 
@@ -594,7 +595,7 @@ class TestSha256BodyAssertion(unittest.TestCase):
             'expected': expected,
         }
         assertion = Sha256BodyAssertion.from_dict(spec)
-        case = Mock()
+        case = MockTestCase()
 
         # When
         assertion.run(config, url, case, response)
@@ -627,7 +628,7 @@ class TestSha256BodyAssertion(unittest.TestCase):
             'expected': expected,
         }
         assertion = Sha256BodyAssertion.from_dict(spec)
-        case = Mock()
+        case = MockTestCase()
 
         # When
         assertion.run(config, url, case, response)
