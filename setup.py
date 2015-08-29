@@ -111,7 +111,7 @@ if __name__ == "__main__":
         'requests',
         'six',
         'stevedore',
-        'haas >= 0.6.0, < 0.7.0',
+        'haas >= 0.6.0',
         'jq >= 0.1.3, < 0.2',
     ]
     py26_requires = ['unittest2']
