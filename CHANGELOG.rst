@@ -2,6 +2,16 @@
  Usagi Changelog
 =================
 
+
+Version 0.3.1
+=============
+
+Bug fixes
+---------
+
+* Tests run with mock v1.3.0.
+
+
 Version 0.3.0
 =============
 
